@@ -1,5 +1,6 @@
 package com.example.mojamarket.models;
-
+import org.json.JSONException;
+import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -55,5 +56,21 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    //Method to turn the object to JSON for HTTP requests
+    public JSONObject toJSONObject() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("userID", this.userID.toString());
+            jsonObject.put("name", this.name);
+            jsonObject.put("surname", this.surname);
+            jsonObject.put("username", this.username);
+            jsonObject.put("email", this.email);
+            jsonObject.put("password", this.password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
     }
 }

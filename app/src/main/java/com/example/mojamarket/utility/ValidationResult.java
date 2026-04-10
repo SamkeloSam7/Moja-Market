@@ -8,4 +8,12 @@ public class ValidationResult {
         this.isValid = isValid;
         this.message = message;
     }
+
+    public boolean isValid() {
+        return isValid;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }
