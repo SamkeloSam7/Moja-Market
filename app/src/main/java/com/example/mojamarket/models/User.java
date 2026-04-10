@@ -73,4 +73,22 @@ public class User {
         }
         return jsonObject;
     }
+
+    public static User fromJSONObject(JSONObject json) {
+        try {
+            User user = new User(
+                    json.getString("name"),
+                    json.getString("surname"),
+                    json.getString("username"),
+                    json.getString("email"),
+                    json.getString("password")
+            );
+            // Set the original UUID back to the user
+            user.userID = UUID.fromString(json.getString("userID"));
+            return user;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

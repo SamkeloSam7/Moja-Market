@@ -16,8 +16,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mojamarket.auth.Register;
-import com.example.mojamarket.models.User;
-import com.example.mojamarket.utility.AddNewUser;
 import com.example.mojamarket.utility.Validation;
 import com.example.mojamarket.utility.ValidationResult;
 import com.google.android.material.button.MaterialButton;

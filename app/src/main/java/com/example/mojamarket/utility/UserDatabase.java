@@ -2,40 +2,54 @@ package com.example.mojamarket.utility;
 
 import android.content.Context;
 import com.example.mojamarket.R;
+import com.example.mojamarket.models.User;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
-public class AddNewUser {
+public class UserDatabase {
 
     private static final String FILE_NAME = "users.json";
 
-    // Add new user
-    public static void addUser(Context context, JSONObject newUser) {
+    public static void addUser(Context context, User newUser) {
         try {
-            JSONArray users = loadUsers(context);
-            users.put(newUser);
+            JSONArray usersArray = loadRawArray(context);
+            usersArray.put(newUser.toJSONObject());
 
-            // Save back to internal storage
             FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
-            fos.write(users.toString().getBytes(StandardCharsets.UTF_8));
+            fos.write(usersArray.toString().getBytes(StandardCharsets.UTF_8));
             fos.close();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    public static JSONArray loadUsers(Context context) {
+
+    public static ArrayList<User> getUsers(Context context) {
+        ArrayList<User> userList = new ArrayList<>();
+        JSONArray jsonArray = loadRawArray(context);
+
+        try {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                User user = User.fromJSONObject(jsonArray.getJSONObject(i));
+                if (user != null) userList.add(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userList;
+    }
+
+    private static JSONArray loadRawArray(Context context) {
         try {
             FileInputStream fis = context.openFileInput(FILE_NAME);
             byte[] buffer = new byte[fis.available()];
             fis.read(buffer);
             fis.close();
             return new JSONArray(new String(buffer, StandardCharsets.UTF_8));
-
         } catch (Exception e) {
             return loadFromRaw(context);
         }
