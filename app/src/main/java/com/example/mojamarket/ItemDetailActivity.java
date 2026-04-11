@@ -1,5 +1,6 @@
 package com.example.mojamarket;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -9,6 +10,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 public class ItemDetailActivity extends AppCompatActivity {
 
     private ImageButton backButton;
@@ -17,6 +21,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     private TextView itemPrice;
     private TextView itemStatus;
     private TextView itemCondition;
+    private TextView itemDatePosted;
     private TextView sellerName;
     private TextView sellerUsername;
     private TextView sellerRating;
@@ -27,6 +32,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_detail);
 
@@ -36,6 +42,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         itemPrice = findViewById(R.id.itemPrice);
         itemStatus = findViewById(R.id.itemStatus);
         itemCondition = findViewById(R.id.itemCondition);
+        itemDatePosted = findViewById(R.id.itemDatePosted);
         sellerName = findViewById(R.id.sellerName);
         sellerUsername = findViewById(R.id.sellerUsername);
         sellerRating = findViewById(R.id.sellerRating);
@@ -46,82 +53,60 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        int itemId = getIntent().getIntExtra("item_id", -1);
+        Intent intent = getIntent();
 
-        Item item = getSampleItemById(itemId);
+        String name = intent.getStringExtra("item_name");
+        String description = intent.getStringExtra("item_description");
+        double price = intent.getDoubleExtra("item_price", 0);
+        String location = intent.getStringExtra("item_location");
+        String condition = intent.getStringExtra("item_condition");
+        int stock = intent.getIntExtra("item_stock", 0);
+        int imageRes = intent.getIntExtra("item_image", android.R.drawable.ic_menu_gallery);
+        double rating = intent.getDoubleExtra("item_rating", 0);
+        int ratingCount = intent.getIntExtra("item_rating_count", 0);
+        String datePosted = intent.getStringExtra("item_date_posted");
+        String seller = intent.getStringExtra("item_seller");
 
-        if (item != null) {
-            itemImage.setImageResource(item.getImageResId());
-            itemName.setText(item.getName());
-            itemPrice.setText("R" + (int) item.getPrice());
-            itemDescription.setText(item.getDescription());
-            itemLocation.setText(item.getLocation());
-            itemCondition.setText(item.getCondition());
-            itemConditionDetail.setText(item.getCondition());
+        if (name == null) name = "Unknown Item";
+        if (description == null) description = "No description available.";
+        if (location == null) location = "Unknown location";
+        if (condition == null) condition = "Unknown condition";
+        if (datePosted == null) datePosted = "Unknown date";
+        if (seller == null) seller = "unknown_user";
 
-            if (item.getStock() > 0) {
-                itemStatus.setText("In Stock (" + item.getStock() + ")");
-            } else {
-                itemStatus.setText("Sold Out");
-            }
+        itemName.setText(name);
+        itemDescription.setText(description);
+        itemLocation.setText(location);
+        itemCondition.setText(condition);
+        itemConditionDetail.setText(condition);
+        itemDatePosted.setText("Posted on " + datePosted);
+        itemImage.setImageResource(imageRes);
 
-            sellerName.setText("Samkelo Mthembu");
-            sellerUsername.setText("@samkelo");
-            sellerRating.setText("4.8 (12)");
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+        itemPrice.setText("R" + numberFormat.format((int) price));
+
+        if (stock > 0) {
+            itemStatus.setText("In Stock (" + stock + ")");
+        } else {
+            itemStatus.setText("Sold Out");
         }
 
+        sellerName.setText("Samkelo Mthembu");
+        sellerUsername.setText("@" + seller);
+
+        if (ratingCount > 0) {
+            sellerRating.setText(String.format(Locale.getDefault(), "%.1f (%d)", rating, ratingCount));
+        } else {
+            sellerRating.setText(String.format(Locale.getDefault(), "%.1f", rating));
+        }
+
+        String finalSeller = seller;
         contactSellerButton.setOnClickListener(v -> {
-            // Chat screen will go here later
+            Intent chatIntent = new Intent(ItemDetailActivity.this, ChatActivity.class);
+            chatIntent.putExtra("user_id", 1);
+            chatIntent.putExtra("name", "Samkelo Mthembu");
+            chatIntent.putExtra("username", finalSeller);
+            startActivity(chatIntent);
         });
-    }
-
-    private Item getSampleItemById(int itemId) {
-        if (itemId == 1) {
-            return new Item(
-                    1,
-                    "iPhone 13 Pro",
-                    "Excellent condition, barely used. Comes with original box and charger.",
-                    12000,
-                    "Johannesburg",
-                    "Used - Excellent",
-                    1,
-                    android.R.drawable.ic_menu_gallery,
-                    4.8,
-                    5,
-                    "28/03/2026",
-                    "yamkela_j"
-            );
-        } else if (itemId == 2) {
-            return new Item(
-                    2,
-                    "Gaming Laptop",
-                    "High performance laptop suitable for gaming, design, and coding.",
-                    15000,
-                    "Johannesburg",
-                    "Used - Good",
-                    1,
-                    android.R.drawable.ic_menu_gallery,
-                    4.7,
-                    8,
-                    "29/03/2026",
-                    "blessings_k"
-            );
-        } else if (itemId == 3) {
-            return new Item(
-                    3,
-                    "Sony Headphones",
-                    "Clean audio, noise cancelling, and still in very good condition.",
-                    2500,
-                    "Wits Campus",
-                    "Used - Very Good",
-                    2,
-                    android.R.drawable.ic_menu_gallery,
-                    4.6,
-                    4,
-                    "30/03/2026",
-                    "samkelo_m"
-            );
-        }
-        return null;
     }
 }

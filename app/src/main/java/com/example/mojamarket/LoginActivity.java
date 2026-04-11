@@ -24,6 +24,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -33,10 +34,15 @@ public class LoginActivity extends AppCompatActivity {
 
         backButton.setOnClickListener(v -> finish());
 
-        // ✅ GO TO HOME SCREEN
         loginButton.setOnClickListener(v -> {
+            getSharedPreferences("MojaMarketPrefs", MODE_PRIVATE)
+                    .edit()
+                    .putBoolean("isLoggedIn", true)
+                    .apply();
+
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
+            finish();
         });
 
         String fullText = "Don't have an account? Register";

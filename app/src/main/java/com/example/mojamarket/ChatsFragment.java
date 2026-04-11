@@ -1,64 +1,95 @@
 package com.example.mojamarket;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ChatsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChatsFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private RecyclerView chatsRecyclerView;
+    private LinearLayout emptyStateLayout;
+    private TextView messagesSubtitle;
+    private ChatPreviewAdapter chatPreviewAdapter;
+    private List<ChatPreview> chatList;
 
     public ChatsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ChatsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ChatsFragment newInstance(String param1, String param2) {
-        ChatsFragment fragment = new ChatsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_chats, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        chatsRecyclerView = view.findViewById(R.id.chatsRecyclerView);
+        emptyStateLayout = view.findViewById(R.id.emptyStateLayout);
+        messagesSubtitle = view.findViewById(R.id.messagesSubtitle);
+
+        chatsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        chatList = new ArrayList<>();
+
+        chatList.add(new ChatPreview(
+                1,
+                "Samkelo Mthembu",
+                "samkelo",
+                "Hey, is this item still available?",
+                "2:45 PM",
+                2
+        ));
+
+        chatList.add(new ChatPreview(
+                2,
+                "Yamkela Dlamini",
+                "yamkela_j",
+                "Yes, I can meet tomorrow.",
+                "Yesterday",
+                0
+        ));
+
+        chatList.add(new ChatPreview(
+                3,
+                "Blessings Nkosi",
+                "blessings_k",
+                "Thanks, I’m interested.",
+                "3 days ago",
+                1
+        ));
+
+        int unreadCount = 0;
+        for (ChatPreview chat : chatList) {
+            if (chat.getUnread() > 0) {
+                unreadCount++;
+            }
+        }
+
+        messagesSubtitle.setText(unreadCount + " unread");
+
+        if (chatList.isEmpty()) {
+            emptyStateLayout.setVisibility(View.VISIBLE);
+            chatsRecyclerView.setVisibility(View.GONE);
+        } else {
+            emptyStateLayout.setVisibility(View.GONE);
+            chatsRecyclerView.setVisibility(View.VISIBLE);
+            chatPreviewAdapter = new ChatPreviewAdapter(requireContext(), chatList);
+            chatsRecyclerView.setAdapter(chatPreviewAdapter);
+        }
     }
 }

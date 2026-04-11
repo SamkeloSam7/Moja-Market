@@ -3,9 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:background="@color/surface_background">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,14 +13,14 @@
         android:paddingTop="20dp"
         android:paddingEnd="20dp"
         android:paddingBottom="16dp"
-        android:background="#FFFFFF">
+        android:background="@color/surface_background">
 
         <TextView
             android:id="@+id/homeTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Moja Market"
-            android:textColor="#0B1F4D"
+            android:textColor="@color/primary_text"
             android:textSize="28sp"
             android:textStyle="bold" />
 
@@ -30,22 +29,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Browse items"
-            android:textColor="#64748B"
+            android:text="Browse items for sale"
+            android:textColor="@color/secondary_text"
             android:textSize="16sp" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#E5E7EB" />
+        android:background="@color/border_color" />
 
-    <!-- Items -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/itemsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F8FAFC"
+        android:background="@color/app_background"
         android:clipToPadding="false"
         android:padding="16dp" />
 

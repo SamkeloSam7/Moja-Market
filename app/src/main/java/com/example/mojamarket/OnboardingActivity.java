@@ -1,7 +1,6 @@
 package com.example.mojamarket;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,6 +24,15 @@ public class OnboardingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applySavedTheme(this);
+
+        if (getSharedPreferences("MojaMarketPrefs", MODE_PRIVATE)
+                .getBoolean("isLoggedIn", false)) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+            return;
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboarding);
 
@@ -33,8 +41,6 @@ public class OnboardingActivity extends AppCompatActivity {
         skipText = findViewById(R.id.skipText);
         dotsLayout = findViewById(R.id.dotsLayout);
 
-        skipText.setOnClickListener(v -> completeOnboarding());
-
         setupOnboardingItems();
 
         OnboardingAdapter adapter = new OnboardingAdapter(onboardingItems);
@@ -42,6 +48,8 @@ public class OnboardingActivity extends AppCompatActivity {
 
         setupDots();
         updateDots(0);
+
+        skipText.setOnClickListener(v -> goToWelcome());
 
         onboardingViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -59,13 +67,19 @@ public class OnboardingActivity extends AppCompatActivity {
 
         nextButton.setOnClickListener(v -> {
             int current = onboardingViewPager.getCurrentItem();
+
             if (current < onboardingItems.size() - 1) {
                 onboardingViewPager.setCurrentItem(current + 1);
             } else {
-                completeOnboarding();
+                goToWelcome();
             }
         });
+    }
 
+    private void goToWelcome() {
+        Intent intent = new Intent(OnboardingActivity.this, WelcomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void setupOnboardingItems() {
@@ -129,11 +143,5 @@ public class OnboardingActivity extends AppCompatActivity {
                 dotsLayout.getChildAt(i).setBackgroundResource(R.drawable.dot_inactive);
             }
         }
-    }
-
-    private void completeOnboarding() {
-        Intent intent = new Intent(OnboardingActivity.this, WelcomeActivity.class);
-        startActivity(intent);
-        finish();
     }
 }

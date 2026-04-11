@@ -1,64 +1,293 @@
 package com.example.mojamarket;
 
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+
 import android.view.ViewGroup;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProfileFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private MaterialButton tabMyListings;
+    private MaterialButton tabMyWants;
+    private MaterialButton editProfileButton;
+    private MaterialButton themeToggleButton;
+    private MaterialButton settingsButton;
+    private MaterialButton logoutButton;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private LinearLayout listingsSection;
+    private LinearLayout wantsSection;
+    private LinearLayout listingsEmptyState;
+    private LinearLayout wantsEmptyState;
+
+    private RecyclerView myListingsRecyclerView;
+    private RecyclerView myWantsRecyclerView;
+
+    private TextView profileSubtitle;
+    private TextView profileInitials;
+    private TextView profileName;
+    private TextView profileEmail;
+    private TextView profileRatingValue;
+    private TextView profileRatingCount;
+    private TextView profileListedCount;
+    private TextView profileWantedCount;
+
+    private List<Item> myListings;
+    private List<WantRequest> myWants;
 
     public ProfileFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_profile, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        profileSubtitle = view.findViewById(R.id.profileSubtitle);
+        profileInitials = view.findViewById(R.id.profileInitials);
+        profileName = view.findViewById(R.id.profileName);
+        profileEmail = view.findViewById(R.id.profileEmail);
+        profileRatingValue = view.findViewById(R.id.profileRatingValue);
+        profileRatingCount = view.findViewById(R.id.profileRatingCount);
+        profileListedCount = view.findViewById(R.id.profileListedCount);
+        profileWantedCount = view.findViewById(R.id.profileWantedCount);
+
+        tabMyListings = view.findViewById(R.id.tabMyListings);
+        tabMyWants = view.findViewById(R.id.tabMyWants);
+
+        listingsSection = view.findViewById(R.id.listingsSection);
+        wantsSection = view.findViewById(R.id.wantsSection);
+        listingsEmptyState = view.findViewById(R.id.listingsEmptyState);
+        wantsEmptyState = view.findViewById(R.id.wantsEmptyState);
+
+        myListingsRecyclerView = view.findViewById(R.id.myListingsRecyclerView);
+        myWantsRecyclerView = view.findViewById(R.id.myWantsRecyclerView);
+
+        editProfileButton = view.findViewById(R.id.editProfileButton);
+        themeToggleButton = view.findViewById(R.id.themeToggleButton);
+        settingsButton = view.findViewById(R.id.settingsButton);
+        logoutButton = view.findViewById(R.id.logoutButton);
+
+        profileSubtitle.setText("@samkelo");
+        profileInitials.setText("SM");
+        profileName.setText("Samkelo Mthembu");
+        profileEmail.setText("samkelosthembiso7@gmail.com");
+        profileRatingValue.setText("4.8");
+        profileRatingCount.setText("12 ratings");
+
+        myListings = new ArrayList<>();
+        myListings.add(new Item(
+                1,
+                "iPhone 13 Pro",
+                "Excellent condition, barely used. Comes with original box and charger.",
+                12000,
+                "Johannesburg",
+                "Used - Excellent",
+                1,
+                android.R.drawable.ic_menu_gallery,
+                4.8,
+                5,
+                "28/03/2026",
+                "samkelo"
+        ));
+
+        myListings.add(new Item(
+                2,
+                "Gaming Laptop",
+                "High performance laptop suitable for gaming, design, and coding.",
+                15000,
+                "Johannesburg",
+                "Used - Good",
+                0,
+                android.R.drawable.ic_menu_gallery,
+                4.7,
+                8,
+                "29/03/2026",
+                "samkelo"
+        ));
+
+        myWants = new ArrayList<>();
+        myWants.add(new WantRequest(
+                1,
+                "Samsung Tablet",
+                "Needed mainly for reading PDFs and online classes.",
+                5000,
+                "5 days ago",
+                "samkelo",
+                false,
+                true
+        ));
+
+        myWants.add(new WantRequest(
+                2,
+                "Office Chair",
+                "Need a comfortable office chair for studying at home.",
+                1500,
+                "Yesterday",
+                "samkelo",
+                true,
+                true
+        ));
+
+        profileListedCount.setText(String.valueOf(myListings.size()));
+        profileWantedCount.setText(String.valueOf(myWants.size()));
+
+        myListingsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        myListingsRecyclerView.setNestedScrollingEnabled(false);
+        myListingsRecyclerView.setAdapter(new MyListingAdapter(myListings));
+
+        myWantsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        myWantsRecyclerView.setNestedScrollingEnabled(false);
+        myWantsRecyclerView.setAdapter(new MyWantAdapter(myWants));
+
+        listingsEmptyState.setVisibility(myListings.isEmpty() ? View.VISIBLE : View.GONE);
+        myListingsRecyclerView.setVisibility(myListings.isEmpty() ? View.GONE : View.VISIBLE);
+
+        wantsEmptyState.setVisibility(myWants.isEmpty() ? View.VISIBLE : View.GONE);
+        myWantsRecyclerView.setVisibility(myWants.isEmpty() ? View.GONE : View.VISIBLE);
+
+        showListingsTab();
+        updateThemeButtonText();
+
+        tabMyListings.setOnClickListener(v -> showListingsTab());
+        tabMyWants.setOnClickListener(v -> showWantsTab());
+
+        editProfileButton.setOnClickListener(v -> showEditProfileDialog());
+
+        themeToggleButton.setOnClickListener(v -> {
+            String currentTheme = ThemeUtils.getCurrentTheme(requireContext());
+
+            if ("dark".equals(currentTheme)) {
+                ThemeUtils.setTheme(requireContext(), "light");
+            } else {
+                ThemeUtils.setTheme(requireContext(), "dark");
+            }
+
+            requireActivity().recreate();
+        });
+
+        settingsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), SettingsActivity.class);
+            startActivity(intent);
+        });
+
+        logoutButton.setOnClickListener(v -> {
+            requireActivity()
+                    .getSharedPreferences("MojaMarketPrefs", 0)
+                    .edit()
+                    .clear()
+                    .apply();
+
+            Intent intent = new Intent(requireActivity(), OnboardingActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        });
+    }
+
+    private void updateThemeButtonText() {
+        String currentTheme = ThemeUtils.getCurrentTheme(requireContext());
+
+        if ("dark".equals(currentTheme)) {
+            themeToggleButton.setText("Switch to Light Mode");
+        } else {
+            themeToggleButton.setText("Switch to Dark Mode");
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+    private void showListingsTab() {
+        listingsSection.setVisibility(View.VISIBLE);
+        wantsSection.setVisibility(View.GONE);
+
+        tabMyListings.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.tab_active_bg)));
+        tabMyListings.setTextColor(ContextCompat.getColor(requireContext(), R.color.tab_active_text));
+
+        tabMyWants.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.tab_inactive_bg)));
+        tabMyWants.setTextColor(ContextCompat.getColor(requireContext(), R.color.tab_inactive_text));
+    }
+
+    private void showWantsTab() {
+        listingsSection.setVisibility(View.GONE);
+        wantsSection.setVisibility(View.VISIBLE);
+
+        tabMyWants.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.tab_active_bg)));
+        tabMyWants.setTextColor(ContextCompat.getColor(requireContext(), R.color.tab_active_text));
+
+        tabMyListings.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.tab_inactive_bg)));
+        tabMyListings.setTextColor(ContextCompat.getColor(requireContext(), R.color.tab_inactive_text));
+    }
+
+    private void showEditProfileDialog() {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_profile, null);
+
+        TextInputEditText editNameInput = dialogView.findViewById(R.id.editNameInput);
+        TextInputEditText editSurnameInput = dialogView.findViewById(R.id.editSurnameInput);
+        TextInputEditText editEmailInput = dialogView.findViewById(R.id.editEmailInput);
+        TextInputEditText editUsernameInput = dialogView.findViewById(R.id.editUsernameInput);
+        MaterialButton saveProfileChangesButton = dialogView.findViewById(R.id.saveProfileChangesButton);
+
+        editNameInput.setText("Samkelo");
+        editSurnameInput.setText("Mthembu");
+        editEmailInput.setText("samkelosthembiso7@gmail.com");
+        editUsernameInput.setText("samkelo");
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        saveProfileChangesButton.setOnClickListener(v -> {
+            String name = getText(editNameInput);
+            String surname = getText(editSurnameInput);
+            String email = getText(editEmailInput);
+            String username = getText(editUsernameInput);
+
+            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(surname) ||
+                    TextUtils.isEmpty(email) || TextUtils.isEmpty(username)) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            profileSubtitle.setText("@" + username);
+            profileInitials.setText((name.substring(0, 1) + surname.substring(0, 1)).toUpperCase());
+            profileName.setText(name + " " + surname);
+            profileEmail.setText(email);
+
+            Toast.makeText(requireContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private String getText(TextInputEditText input) {
+        return input.getText() == null ? "" : input.getText().toString().trim();
     }
 }

@@ -2,22 +2,22 @@ package com.example.mojamarket;
 
 public class Item {
 
-    private int itemId;
-    private String name;
-    private String description;
-    private double price;
-    private String location;
-    private String condition;
-    private int stock;
-    private int imageResId;
-    private double rating;
-    private int ratingCount;
-    private String postedDate;
-    private String sellerUsername;
+    private final int itemId;
+    private final String name;
+    private final String description;
+    private final double price;
+    private final String location;
+    private final String condition;
+    private final int stock;
+    private final int imageResId;
+    private final double rating;
+    private final int ratingCount;
+    private final String datePosted;
+    private final String sellerUsername;
 
     public Item(int itemId, String name, String description, double price,
                 String location, String condition, int stock, int imageResId,
-                double rating, int ratingCount, String postedDate, String sellerUsername) {
+                double rating, int ratingCount, String datePosted, String sellerUsername) {
         this.itemId = itemId;
         this.name = name;
         this.description = description;
@@ -28,7 +28,7 @@ public class Item {
         this.imageResId = imageResId;
         this.rating = rating;
         this.ratingCount = ratingCount;
-        this.postedDate = postedDate;
+        this.datePosted = datePosted;
         this.sellerUsername = sellerUsername;
     }
 
@@ -72,8 +72,8 @@ public class Item {
         return ratingCount;
     }
 
-    public String getPostedDate() {
-        return postedDate;
+    public String getDatePosted() {
+        return datePosted;
     }
 
     public String getSellerUsername() {

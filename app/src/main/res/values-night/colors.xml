@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="app_background">#0F172A</color>
+    <color name="surface_background">#111827</color>
+    <color name="surface_soft">#1F2937</color>
+    <color name="primary_text">#F9FAFB</color>
+    <color name="secondary_text">#CBD5E1</color>
+    <color name="border_color">#334155</color>
+
+    <color name="brand_blue">#60A5FA</color>
+    <color name="brand_blue_dark">#3B82F6</color>
+    <color name="brand_blue_deep">#2563EB</color>
+
+    <color name="brand_purple">#A78BFA</color>
+    <color name="brand_green">#34D399</color>
+    <color name="brand_green_soft">#052E16</color>
+    <color name="brand_yellow">#FACC15</color>
+
+    <color name="badge_available">#10B981</color>
+    <color name="badge_looking">#8B5CF6</color>
+    <color name="badge_fulfilled_bg">#374151</color>
+    <color name="badge_fulfilled_text">#D1D5DB</color>
+
+    <color name="avatar_blue_bg">#1E3A8A</color>
+    <color name="avatar_green_bg">#064E3B</color>
+    <color name="own_request_bg">#172554</color>
+    <color name="info_box_bg">#3B0764</color>
+
+    <color name="tab_active_bg">#374151</color>
+    <color name="tab_inactive_bg">#1F2937</color>
+    <color name="tab_active_text">#F9FAFB</color>
+    <color name="tab_inactive_text">#CBD5E1</color>
+
+    <color name="input_hint">#94A3B8</color>
+    <color name="message_sent_text">#FFFFFF</color>
+    <color name="message_sent_time">#BFDBFE</color>
+
+    <color name="bottom_nav_bg">#1E293B</color>
+    <color name="nav_selected">#3B82F6</color>
+    <color name="nav_unselected">#94A3B8</color>
+</resources>
