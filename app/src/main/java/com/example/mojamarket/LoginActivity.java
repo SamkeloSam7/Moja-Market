@@ -14,35 +14,63 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mojamarket.auth.Login;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 
 public class LoginActivity extends AppCompatActivity {
 
     private ImageButton backButton;
     private TextView registerText;
     private MaterialButton loginButton;
+    private TextInputEditText emailInput;
+    private TextInputEditText passwordInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         backButton = findViewById(R.id.backButton);
         registerText = findViewById(R.id.registerText);
         loginButton = findViewById(R.id.loginButton);
+        emailInput = findViewById(R.id.emailInput);
+        passwordInput = findViewById(R.id.passwordInput);
+
+        emailInput.setError(null);
+        passwordInput.setError(null);
 
         backButton.setOnClickListener(v -> finish());
 
         loginButton.setOnClickListener(v -> {
-            getSharedPreferences("MojaMarketPrefs", MODE_PRIVATE)
-                    .edit()
-                    .putBoolean("isLoggedIn", true)
-                    .apply();
+            String loginID = emailInput.getText() != null ? emailInput.getText().toString().trim() : "";
+            String password = passwordInput.getText() != null ? passwordInput.getText().toString().trim() : "";
 
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
+            emailInput.setError(null);
+            passwordInput.setError(null);
+
+            boolean isFormValid = true;
+
+            if (loginID.isEmpty()) {
+                emailInput.setError("Email or Username required");
+                isFormValid = false;
+            }
+            if (password.isEmpty()) {
+                passwordInput.setError("Password required");
+                isFormValid = false;
+            }
+
+            if (!isFormValid) return;
+
+            boolean isvalidLogin = Login.LoginUserIn(loginID, password, this);
+            if (isvalidLogin) {
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                emailInput.setError("Invalid login credentials");
+                passwordInput.setError("Invalid login credentials");
+            }
         });
 
         String fullText = "Don't have an account? Register";
