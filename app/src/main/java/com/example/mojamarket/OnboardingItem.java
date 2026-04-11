@@ -1,20 +1,19 @@
 package com.example.mojamarket;
 
 public class OnboardingItem {
-    private final int iconResId;
+
+    private final int imageResId;
     private final String title;
     private final String description;
-    private final int backgroundResId;
 
-    public OnboardingItem(int iconResId, String title, String description, int backgroundResId) {
-        this.iconResId = iconResId;
+    public OnboardingItem(int imageResId, String title, String description) {
+        this.imageResId = imageResId;
         this.title = title;
         this.description = description;
-        this.backgroundResId = backgroundResId;
     }
 
-    public int getIconResId() {
-        return iconResId;
+    public int getImageResId() {
+        return imageResId;
     }
 
     public String getTitle() {
@@ -23,9 +22,5 @@ public class OnboardingItem {
 
     public String getDescription() {
         return description;
-    }
-
-    public int getBackgroundResId() {
-        return backgroundResId;
     }
 }

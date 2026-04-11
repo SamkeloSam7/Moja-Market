@@ -53,16 +53,15 @@
             <FrameLayout
                 android:layout_width="96dp"
                 android:layout_height="96dp"
-                android:background="@drawable/bg_logo_circle"
-                android:foreground="?attr/selectableItemBackgroundBorderless">
+                android:background="@drawable/bg_logo_circle">
 
                 <ImageView
                     android:id="@+id/logoIcon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_gravity="center"
-                    android:src="@android:drawable/ic_menu_agenda"
-                    app:tint="@color/brand_blue" />
+                    android:src="@drawable/moja_logo"
+                    android:scaleType="centerInside" />
             </FrameLayout>
         </LinearLayout>
 

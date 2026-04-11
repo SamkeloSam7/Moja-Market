@@ -3,7 +3,6 @@ package com.example.mojamarket;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -12,48 +11,45 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.OnboardingViewHolder> {
+public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.ViewHolder> {
 
-    private final List<OnboardingItem> onboardingItems;
+    private final List<OnboardingItem> items;
 
-    public OnboardingAdapter(List<OnboardingItem> onboardingItems) {
-        this.onboardingItems = onboardingItems;
+    public OnboardingAdapter(List<OnboardingItem> items) {
+        this.items = items;
     }
 
     @NonNull
     @Override
-    public OnboardingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_onboarding, parent, false);
-        return new OnboardingViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_onboarding, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull OnboardingViewHolder holder, int position) {
-        OnboardingItem item = onboardingItems.get(position);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        OnboardingItem item = items.get(position);
 
-        holder.slideIcon.setImageResource(item.getIconResId());
-        holder.slideTitle.setText(item.getTitle());
-        holder.slideDescription.setText(item.getDescription());
-        holder.iconBackground.setBackgroundResource(item.getBackgroundResId());
+        holder.image.setImageResource(item.getImageResId());
+        holder.title.setText(item.getTitle());
+        holder.description.setText(item.getDescription());
     }
 
     @Override
     public int getItemCount() {
-        return onboardingItems.size();
+        return items.size();
     }
 
-    static class OnboardingViewHolder extends RecyclerView.ViewHolder {
-        ImageView slideIcon;
-        TextView slideTitle;
-        TextView slideDescription;
-        FrameLayout iconBackground;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView image;
+        TextView title, description;
 
-        public OnboardingViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            slideIcon = itemView.findViewById(R.id.slideIcon);
-            slideTitle = itemView.findViewById(R.id.slideTitle);
-            slideDescription = itemView.findViewById(R.id.slideDescription);
-            iconBackground = itemView.findViewById(R.id.iconBackground);
+            image = itemView.findViewById(R.id.slideImage);
+            title = itemView.findViewById(R.id.slideTitle);
+            description = itemView.findViewById(R.id.slideDescription);
         }
     }
 }

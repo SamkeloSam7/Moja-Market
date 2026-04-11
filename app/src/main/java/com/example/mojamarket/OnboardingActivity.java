@@ -18,7 +18,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
     private ViewPager2 onboardingViewPager;
     private MaterialButton nextButton;
-    private TextView skipText;
+    private TextView skipButton;
     private LinearLayout dotsLayout;
     private List<OnboardingItem> onboardingItems;
 
@@ -38,7 +38,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
         onboardingViewPager = findViewById(R.id.onboardingViewPager);
         nextButton = findViewById(R.id.nextButton);
-        skipText = findViewById(R.id.skipText);
+        skipButton = findViewById(R.id.skipButton);
         dotsLayout = findViewById(R.id.dotsLayout);
 
         setupOnboardingItems();
@@ -49,7 +49,7 @@ public class OnboardingActivity extends AppCompatActivity {
         setupDots();
         updateDots(0);
 
-        skipText.setOnClickListener(v -> goToWelcome());
+        skipButton.setOnClickListener(v -> goToWelcome());
 
         onboardingViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -77,8 +77,7 @@ public class OnboardingActivity extends AppCompatActivity {
     }
 
     private void goToWelcome() {
-        Intent intent = new Intent(OnboardingActivity.this, WelcomeActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(OnboardingActivity.this, WelcomeActivity.class));
         finish();
     }
 
@@ -86,31 +85,27 @@ public class OnboardingActivity extends AppCompatActivity {
         onboardingItems = new ArrayList<>();
 
         onboardingItems.add(new OnboardingItem(
-                android.R.drawable.ic_menu_agenda,
+                R.drawable.onboarding_welcome,
                 "Welcome to Moja Market",
-                "Your trusted peer-to-peer marketplace for buying and selling items directly with other users.",
-                R.drawable.bg_circle_blue
+                "Your trusted peer-to-peer marketplace for buying and selling items directly with other users."
         ));
 
         onboardingItems.add(new OnboardingItem(
-                android.R.drawable.ic_menu_upload,
+                R.drawable.onboarding_sell,
                 "List Your Items",
-                "Post items you want to sell with photos, descriptions, and set your own prices. Manage your listings easily.",
-                R.drawable.bg_circle_purple
+                "Post items you want to sell with photos, descriptions, and set your own prices."
         ));
 
         onboardingItems.add(new OnboardingItem(
-                android.R.drawable.ic_dialog_email,
+                R.drawable.onboarding_chat,
                 "Chat & Negotiate",
-                "Communicate directly with buyers and sellers through our built-in messaging system. Negotiate and close deals safely.",
-                R.drawable.bg_circle_green
+                "Communicate directly with buyers and sellers and negotiate deals safely."
         ));
 
         onboardingItems.add(new OnboardingItem(
-                android.R.drawable.ic_lock_lock,
+                R.drawable.onboarding_rating,
                 "Rate & Review",
-                "Build trust in the community by rating your transactions and checking seller ratings before you buy.",
-                R.drawable.bg_circle_orange
+                "Build trust by rating your transactions and reviewing other users."
         ));
     }
 

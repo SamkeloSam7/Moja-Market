@@ -4,46 +4,31 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
-    android:paddingTop="40dp"
-    android:paddingBottom="40dp">
+    android:padding="24dp">
 
-    <FrameLayout
-        android:id="@+id/iconBackground"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:layout_marginBottom="40dp"
-        android:background="@drawable/bg_circle_blue">
-
-        <ImageView
-            android:id="@+id/slideIcon"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:src="@android:drawable/ic_menu_agenda"
-            android:tint="#FFFFFF" />
-    </FrameLayout>
+    <ImageView
+        android:id="@+id/slideImage"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        android:layout_marginBottom="32dp"
+        android:scaleType="fitCenter" />
 
     <TextView
         android:id="@+id/slideTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Welcome to Moja Market"
         android:textColor="#FFFFFF"
-        android:textSize="30sp"
-        android:textStyle="bold" />
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"/>
 
     <TextView
         android:id="@+id/slideDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:lineSpacingExtra="4dp"
-        android:text="Your trusted peer-to-peer marketplace for buying and selling items directly with other users."
         android:textColor="#D1D5DB"
-        android:textSize="18sp" />
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_marginTop="12dp"/>
 
 </LinearLayout>

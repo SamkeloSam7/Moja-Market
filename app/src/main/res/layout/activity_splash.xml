@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@drawable/bg_welcome_gradient"
+    android:padding="24dp">
+
+    <FrameLayout
+        android:layout_width="132dp"
+        android:layout_height="132dp"
+        android:background="@drawable/bg_logo_white_circle"
+        android:elevation="6dp">
+
+        <ImageView
+            android:id="@+id/splashLogo"
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:layout_gravity="center"
+            android:src="@drawable/moja_logo"
+            android:scaleType="centerInside" />
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="Moja Market"
+        android:textColor="@color/message_sent_text"
+        android:textSize="34sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/splashSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Buy. Sell. Connect."
+        android:textColor="#DBEAFE"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:alpha="0.3" />
+
+</LinearLayout>
