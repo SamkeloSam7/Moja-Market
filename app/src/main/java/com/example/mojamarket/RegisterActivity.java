@@ -15,6 +15,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mojamarket.auth.Register;
+import com.example.mojamarket.utility.Validation;
+import com.example.mojamarket.utility.ValidationResult;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -51,6 +54,7 @@ public class RegisterActivity extends AppCompatActivity {
         backButton.setOnClickListener(v -> finish());
 
         createAccountButton.setOnClickListener(v -> {
+            // Get inputs from user
             String name = getText(nameInput);
             String surname = getText(surnameInput);
             String email = getText(emailInput);
@@ -58,34 +62,54 @@ public class RegisterActivity extends AppCompatActivity {
             String password = getText(passwordInput);
             String confirmPassword = getText(confirmPasswordInput);
 
-            if (name.isEmpty() || surname.isEmpty() || email.isEmpty() ||
-                    username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                return;
+            //Validate the input
+            ValidationResult nameRes = Validation.validateName(name);
+            ValidationResult surnameRes = Validation.validateSurname(surname);
+            ValidationResult emailRes = Validation.validateEmail(email);
+            ValidationResult userRes = Validation.validateUsername(username);
+            ValidationResult passRes = Validation.validatePassword(password);
+
+            // Check if input is valid and set errors
+            boolean isFormValid = true;
+
+            if (!nameRes.isValid) {
+                nameInput.setError(nameRes.message);
+                isFormValid = false;
+            }
+            if (!surnameRes.isValid) {
+                surnameInput.setError(surnameRes.message);
+                isFormValid = false;
+            }
+            if (!emailRes.isValid) {
+                emailInput.setError(emailRes.message);
+                isFormValid = false;
+            }
+            if (!userRes.isValid) {
+                usernameInput.setError(userRes.message);
+                isFormValid = false;
+            }
+            if (!passRes.isValid) {
+                passwordInput.setError(passRes.message);
+                isFormValid = false;
             }
 
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (password.length() < 6) {
-                Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
+            // Manual check if passwords match
             if (!password.equals(confirmPassword)) {
-                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
-                return;
+                confirmPasswordInput.setError("Passwords do not match");
+                isFormValid = false;
             }
+
+            //If errors are found stop
+            if (!isFormValid) return;
+
+            // If input is valid Register the user
+            Register.RegisterUser(name, surname, username, email, password,this);
+
 
             Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
-
-            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
         });
-
         String fullText = "Already have an account? Login";
         SpannableString spannableString = new SpannableString(fullText);
 
