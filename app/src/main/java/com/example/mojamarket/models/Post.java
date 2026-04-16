@@ -2,13 +2,17 @@ package com.example.mojamarket.models;
 
 import android.media.Image;
 import com.example.mojamarket.session.SessionManager;
+import com.example.mojamarket.utility.Helper;
+
+import org.json.JSONObject;
+
 import java.util.Date;
 import java.util.UUID;
 
 public class Post {
     private final UUID itemID;
     private final User seller;
-    private final Date datePosted; //final to make sure date does not get modified
+    private final Date datePosted; // final to make sure date does not get modified
 
     private String itemName;
     private String itemDescription;
@@ -21,7 +25,7 @@ public class Post {
     private Image itemImage;
 
     public Post(String itemName, String itemDescription, String condition, double price, int quantity, String stockStatus, String sellerLocation) {
-        this.itemID = UUID.randomUUID(); //unique ID for identification
+        this.itemID = UUID.randomUUID(); // unique ID for identification
         this.seller = SessionManager.getLoggedinUser();
         this.datePosted = new Date();
 
@@ -123,5 +127,13 @@ public class Post {
 
     public void setItemImage(Image itemImage) {
         this.itemImage = itemImage;
+    }
+
+    public static Post fromJSONObject(JSONObject json) {
+        return Helper.postFromJSON(json);
+    }
+
+    public JSONObject toJSONObject() {
+        return Helper.postToJSON(this);
     }
 }

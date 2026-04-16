@@ -1,12 +1,18 @@
 package com.example.mojamarket.models;
-import org.json.JSONException;
+
+import android.content.Context;
+
+import com.example.mojamarket.utility.Helper;
+import com.example.mojamarket.utility.PostDatabase;
+import com.example.mojamarket.utility.UserDatabase;
+
 import org.json.JSONObject;
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class User {
     private String name, surname, username, email, password;
     private UUID userID;
+
     public User(String name, String surname, String username, String email, String password) {
         this.userID = UUID.randomUUID(); // random ID for unique user identification
         this.name = name;
@@ -15,7 +21,8 @@ public class User {
         this.email = email;
         this.password = password;
     }
-    //getters for user data retrieval
+
+    // getters for user data retrieval
     public UUID getUserID() {
         return userID;
     }
@@ -23,6 +30,7 @@ public class User {
     public String getName() {
         return name;
     }
+
     public String getSurname() {
         return surname;
     }
@@ -34,10 +42,16 @@ public class User {
     public String getPassword() {
         return password;
     }
+
     public String getEmail() {
         return email;
     }
-    //setters for updating user information
+
+    // setters for updating user information
+    public void setUserID(UUID userID) {
+        this.userID = userID;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -58,37 +72,23 @@ public class User {
         this.password = password;
     }
 
-    //Method to turn the object to JSON for HTTP requests
-    public JSONObject toJSONObject() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("userID", this.userID.toString());
-            jsonObject.put("name", this.name);
-            jsonObject.put("surname", this.surname);
-            jsonObject.put("username", this.username);
-            jsonObject.put("email", this.email);
-            jsonObject.put("password", this.password);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonObject;
+    public void postItem(Context context, Post post) {
+        PostDatabase.addPost(context,post);
+    }
+
+    public void updatePost(Context context, Post post) {
+        PostDatabase.updatePost(context,post);
+    }
+
+    public void deletePost(Context context, Post post) {
+        PostDatabase.deletePost(context, post.getItemID());
     }
 
     public static User fromJSONObject(JSONObject json) {
-        try {
-            User user = new User(
-                    json.getString("name"),
-                    json.getString("surname"),
-                    json.getString("username"),
-                    json.getString("email"),
-                    json.getString("password")
-            );
-            // Set the original UUID back to the user
-            user.userID = UUID.fromString(json.getString("userID"));
-            return user;
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return Helper.userFromJSON(json);
+    }
+
+    public JSONObject toJSONObject() {
+        return Helper.userToJSON(this);
     }
 }
