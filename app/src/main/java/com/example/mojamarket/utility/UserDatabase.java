@@ -19,13 +19,25 @@ public class UserDatabase {
         try {
             JSONArray usersArray = loadRawArray(context);
             usersArray.put(newUser.toJSONObject());
-
-            FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
-            fos.write(usersArray.toString().getBytes(StandardCharsets.UTF_8));
-            fos.close();
+            saveRawArray(context, usersArray);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static User getUser(Context context, String userId) {
+        try {
+            JSONArray jsonArray = loadRawArray(context);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                if (obj.has("id") && obj.getString("id").equals(userId)) {
+                    return User.fromJSONObject(obj);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static ArrayList<User> getUsers(Context context) {
@@ -41,6 +53,47 @@ public class UserDatabase {
             e.printStackTrace();
         }
         return userList;
+    }
+
+    public static void updateUser(Context context, User updatedUser) {
+        try {
+            JSONArray jsonArray = loadRawArray(context);
+            JSONObject updatedObj = updatedUser.toJSONObject();
+            String targetId = updatedObj.getString("id");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                if (obj.has("id") && obj.getString("id").equals(targetId)) {
+                    jsonArray.put(i, updatedObj);
+                    saveRawArray(context, jsonArray);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteUser(Context context, String userId) {
+        try {
+            JSONArray jsonArray = loadRawArray(context);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                if (obj.has("id") && obj.getString("id").equals(userId)) {
+                    jsonArray.remove(i);
+                    saveRawArray(context, jsonArray);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void saveRawArray(Context context, JSONArray jsonArray) throws Exception {
+        FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
+        fos.write(jsonArray.toString().getBytes(StandardCharsets.UTF_8));
+        fos.close();
     }
 
     private static JSONArray loadRawArray(Context context) {
