@@ -11,17 +11,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mojamarket.models.Post;
+
 import java.util.List;
 import java.util.Locale;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
 
     private final Context context;
-    private final List<Item> itemList;
+    private final List<Post> posts;
 
-    public ItemAdapter(Context context, List<Item> itemList) {
+    public ItemAdapter(Context context, List<Post> posts) {
         this.context = context;
-        this.itemList = itemList;
+        this.posts = posts;
     }
 
     @NonNull
@@ -33,22 +35,22 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        Item item = itemList.get(position);
+        Post post = posts.get(position);
 
-        holder.itemName.setText(item.getName());
-        holder.itemDescription.setText(item.getDescription());
-        holder.itemPrice.setText(String.format(Locale.getDefault(), "R%,.0f", item.getPrice()));
-        holder.itemLocation.setText(item.getLocation());
-        holder.itemDate.setText("Posted " + item.getDatePosted());
-        holder.itemSeller.setText("by " + item.getSellerUsername());
+        holder.itemName.setText(post.getItemName());
+        holder.itemDescription.setText(post.getItemDescription());
+        holder.itemPrice.setText(String.format(Locale.getDefault(), "R%,.0f", post.getPrice()));
+        holder.itemLocation.setText(post.getSellerLocation());
+        holder.itemDate.setText("Posted " + post.getDatePosted().toString());
+        holder.itemSeller.setText("by " + (post.getSeller() != null ? post.getSeller().getUsername() : "unknown"));
 
-        if (item.getRating() > 0) {
-            holder.itemRating.setText(String.format(Locale.getDefault(), "%.1f (%d)", item.getRating(), item.getRatingCount()));
+        if (post.getAverageRating() > 0) {
+            holder.itemRating.setText(String.format(Locale.getDefault(), "%.1f (%d)", post.getAverageRating(), 0));
         } else {
             holder.itemRating.setText("0.0");
         }
 
-        if (item.getStock() > 0) {
+        if (post.getQuantity() > 0) {
             holder.itemStatus.setText("Available");
             holder.itemStatus.setBackgroundResource(R.drawable.bg_available_badge);
             holder.itemStatus.setTextColor(0xFFFFFFFF);
@@ -58,29 +60,29 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
             holder.itemStatus.setTextColor(0xFF6B7280);
         }
 
-        holder.itemImage.setImageResource(item.getImageResId());
+        holder.itemImage.setImageResource(android.R.drawable.ic_menu_gallery);
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ItemDetailActivity.class);
-            intent.putExtra("item_id", item.getItemId());
-            intent.putExtra("item_name", item.getName());
-            intent.putExtra("item_description", item.getDescription());
-            intent.putExtra("item_price", item.getPrice());
-            intent.putExtra("item_location", item.getLocation());
-            intent.putExtra("item_condition", item.getCondition());
-            intent.putExtra("item_stock", item.getStock());
-            intent.putExtra("item_image", item.getImageResId());
-            intent.putExtra("item_rating", item.getRating());
-            intent.putExtra("item_rating_count", item.getRatingCount());
-            intent.putExtra("item_date_posted", item.getDatePosted());
-            intent.putExtra("item_seller", item.getSellerUsername());
+            intent.putExtra("item_id", post.getItemID().toString());
+            intent.putExtra("item_name", post.getItemName());
+            intent.putExtra("item_description", post.getItemDescription());
+            intent.putExtra("item_price", post.getPrice());
+            intent.putExtra("item_location", post.getSellerLocation());
+            intent.putExtra("item_condition", post.getCondition());
+            intent.putExtra("item_stock", post.getQuantity());
+            intent.putExtra("item_image", android.R.drawable.ic_menu_gallery);
+            intent.putExtra("item_rating", post.getAverageRating());
+            intent.putExtra("item_rating_count", 0);
+            intent.putExtra("item_date_posted", post.getDatePosted().toString());
+            intent.putExtra("item_seller", post.getSeller() != null ? post.getSeller().getUsername() : "unknown");
             context.startActivity(intent);
         });
     }
 
     @Override
     public int getItemCount() {
-        return itemList.size();
+        return posts.size();
     }
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder {

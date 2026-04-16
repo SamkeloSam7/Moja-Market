@@ -33,7 +33,7 @@ public class PostDatabase {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 if (obj.has("itemID") && obj.getString("itemID").equals(postId.toString())) {
-                    return Post.fromJSONObject(obj);
+                    return Post.fromJSONObject(obj, context);
                 }
             }
         } catch (Exception e) {
@@ -48,7 +48,7 @@ public class PostDatabase {
 
         try {
             for (int i = 0; i < jsonArray.length(); i++) {
-                Post post = Post.fromJSONObject(jsonArray.getJSONObject(i));
+                Post post = Post.fromJSONObject(jsonArray.getJSONObject(i), context);
                 if (post != null) postList.add(post);
             }
         } catch (Exception e) {
@@ -63,7 +63,7 @@ public class PostDatabase {
 
         try {
             for (int i = 0; i < jsonArray.length(); i++) {
-                Post post = Post.fromJSONObject(jsonArray.getJSONObject(i));
+                Post post = Post.fromJSONObject(jsonArray.getJSONObject(i), context);
                 if (post != null && post.getSeller() != null
                         && post.getSeller().getUserID().equals(seller.getUserID())) {
                     postList.add(post);
@@ -116,7 +116,7 @@ public class PostDatabase {
             JSONArray filtered = new JSONArray();
 
             for (int i = 0; i < jsonArray.length(); i++) {
-                Post post = Post.fromJSONObject(jsonArray.getJSONObject(i));
+                Post post = Post.fromJSONObject(jsonArray.getJSONObject(i), context);
                 if (post == null || post.getSeller() == null
                         || !post.getSeller().getUserID().equals(seller.getUserID())) {
                     filtered.put(jsonArray.getJSONObject(i));

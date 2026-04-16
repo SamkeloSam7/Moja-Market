@@ -1,5 +1,6 @@
 package com.example.mojamarket.models;
 
+import android.content.Context;
 import android.media.Image;
 import com.example.mojamarket.session.SessionManager;
 import com.example.mojamarket.utility.Helper;
@@ -24,9 +25,9 @@ public class Post {
     private double averageRating;
     private Image itemImage;
 
-    public Post(String itemName, String itemDescription, String condition, double price, int quantity, String stockStatus, String sellerLocation) {
+    public Post(String itemName, String itemDescription, String condition, double price, int quantity, String stockStatus, String sellerLocation, Context context) {
         this.itemID = UUID.randomUUID(); // unique ID for identification
-        this.seller = SessionManager.getLoggedinUser();
+        this.seller = SessionManager.getLoggedInUser(context);
         this.datePosted = new Date();
 
         this.itemName = itemName;
@@ -129,8 +130,8 @@ public class Post {
         this.itemImage = itemImage;
     }
 
-    public static Post fromJSONObject(JSONObject json) {
-        return Helper.postFromJSON(json);
+    public static Post fromJSONObject(JSONObject json, Context context) {
+        return Helper.postFromJSON(json, context);
     }
 
     public JSONObject toJSONObject() {

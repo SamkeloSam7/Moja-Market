@@ -1,5 +1,9 @@
 package com.example.mojamarket.utility;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
+import android.content.Context;
+
 import com.example.mojamarket.models.Post;
 import com.example.mojamarket.models.User;
 
@@ -59,7 +63,7 @@ public class Helper {
         }
         return jsonObject;
     }
-    public static Post postFromJSON(JSONObject json) {
+    public static Post postFromJSON(JSONObject json, Context context) {
         try {
             Post post = new Post(
                     json.getString("itemName"),
@@ -68,7 +72,8 @@ public class Helper {
                     json.getDouble("price"),
                     json.getInt("quantity"),
                     json.getString("stockStatus"),
-                    json.getString("sellerLocation")
+                    json.getString("sellerLocation"),
+                    context
             );
             post.setAverageRating(json.getDouble("averageRating"));
             return post;

@@ -4,17 +4,21 @@ import android.content.Context;
 
 import com.example.mojamarket.utility.Helper;
 import com.example.mojamarket.utility.PostDatabase;
-import com.example.mojamarket.utility.UserDatabase;
 
 import org.json.JSONObject;
+
 import java.util.UUID;
 
 public class User {
-    private String name, surname, username, email, password;
+    private String name;
+    private String surname;
+    private String username;
+    private String email;
+    private String password;
     private UUID userID;
 
     public User(String name, String surname, String username, String email, String password) {
-        this.userID = UUID.randomUUID(); // random ID for unique user identification
+        this.userID = UUID.randomUUID();
         this.name = name;
         this.surname = surname;
         this.username = username;
@@ -22,7 +26,6 @@ public class User {
         this.password = password;
     }
 
-    // getters for user data retrieval
     public UUID getUserID() {
         return userID;
     }
@@ -47,7 +50,6 @@ public class User {
         return email;
     }
 
-    // setters for updating user information
     public void setUserID(UUID userID) {
         this.userID = userID;
     }
@@ -73,11 +75,11 @@ public class User {
     }
 
     public void postItem(Context context, Post post) {
-        PostDatabase.addPost(context,post);
+        PostDatabase.addPost(context, post);
     }
 
     public void updatePost(Context context, Post post) {
-        PostDatabase.updatePost(context,post);
+        PostDatabase.updatePost(context, post);
     }
 
     public void deletePost(Context context, Post post) {

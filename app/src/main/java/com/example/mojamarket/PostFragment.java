@@ -21,6 +21,8 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.mojamarket.models.Post;
+import com.example.mojamarket.session.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -28,11 +30,9 @@ public class PostFragment extends Fragment {
 
     private MaterialButton tabSellItem;
     private MaterialButton tabWantRequest;
-
     private LinearLayout itemFormLayout;
     private LinearLayout wantFormLayout;
     private LinearLayout uploadBox;
-
     private TextInputEditText itemNameInput;
     private TextInputEditText itemDescriptionInput;
     private TextInputEditText itemPriceInput;
@@ -40,17 +40,14 @@ public class PostFragment extends Fragment {
     private TextInputEditText itemLocationInput;
     private Spinner itemConditionSpinner;
     private MaterialButton postItemButton;
-
     private TextInputEditText wantItemNameInput;
     private TextInputEditText wantDescriptionInput;
     private TextInputEditText wantBudgetInput;
     private MaterialButton postWantButton;
-
     private ImageView uploadPreviewImage;
     private ImageView uploadIcon;
     private TextView uploadText;
     private TextView uploadSubtext;
-
     private Uri selectedImageUri;
 
     private final ActivityResultLauncher<String> imagePickerLauncher =
@@ -132,10 +129,21 @@ public class PostFragment extends Fragment {
                 return;
             }
 
-            if (selectedImageUri == null) {
-                Toast.makeText(requireContext(), "Please upload an image", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            double priceValue = Double.parseDouble(price);
+            int stockValue = Integer.parseInt(stock);
+            String condition = itemConditionSpinner.getSelectedItem().toString();
+
+            Post post = new Post(
+                    name,
+                    description,
+                    condition,
+                    priceValue,
+                    stockValue,
+                    stockValue > 0 ? "Available" : "Sold Out",
+                    location,requireContext()
+            );
+
+            SessionManager.getLoggedInUser(requireContext()).postItem(requireContext(), post);
 
             Toast.makeText(requireContext(), "Item posted successfully!", Toast.LENGTH_SHORT).show();
         });
