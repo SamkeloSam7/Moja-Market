@@ -151,6 +151,19 @@ public class PostFragment extends Fragment {
             SessionManager.getLoggedInUser(requireContext()).postItem(requireContext(), post);
 
             Toast.makeText(requireContext(), "Item posted successfully!", Toast.LENGTH_SHORT).show();
+
+            // Clear inputs
+            itemNameInput.setText("");
+            itemDescriptionInput.setText("");
+            itemPriceInput.setText("");
+            itemStockInput.setText("");
+            itemLocationInput.setText("");
+            itemConditionSpinner.setSelection(0);
+            uploadPreviewImage.setVisibility(View.GONE);
+            uploadIcon.setVisibility(View.VISIBLE);
+            uploadText.setText("Upload Image");
+            uploadSubtext.setText("Tap to select from gallery");
+            selectedImageUri = null;
         });
 
         postWantButton.setOnClickListener(v -> {
@@ -174,6 +187,11 @@ public class PostFragment extends Fragment {
 
             SessionManager.getLoggedInUser(requireContext()).postWant(requireContext(), want);
             Toast.makeText(requireContext(), "Want request posted successfully!", Toast.LENGTH_SHORT).show();
+
+            // Clear inputs
+            wantItemNameInput.setText("");
+            wantDescriptionInput.setText("");
+            wantBudgetInput.setText("");
         });
     }
 
