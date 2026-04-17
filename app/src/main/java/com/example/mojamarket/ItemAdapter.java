@@ -7,11 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mojamarket.models.Post;
+import com.example.mojamarket.models.User;
+import com.example.mojamarket.session.SessionManager;
 
 import java.util.List;
 import java.util.Locale;
@@ -21,9 +24,11 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     private final Context context;
     private final List<Post> posts;
 
+    private User currentUser;
     public ItemAdapter(Context context, List<Post> posts) {
         this.context = context;
         this.posts = posts;
+        this.currentUser = SessionManager.getLoggedInUser(context);
     }
 
     @NonNull
@@ -76,7 +81,17 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
             intent.putExtra("item_rating_count", 0);
             intent.putExtra("item_date_posted", post.getDatePosted().toString());
             intent.putExtra("item_seller", post.getSeller() != null ? post.getSeller().getUsername() : "unknown");
-            context.startActivity(intent);
+
+            if (currentUser == null || post.getSeller() == null) {
+                context.startActivity(intent);
+                return;
+            }
+
+            if (!post.getSeller().getUserID().equals(currentUser.getUserID())) {
+                context.startActivity(intent);
+            } else {
+                Toast.makeText(context, "You can't view your own post", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

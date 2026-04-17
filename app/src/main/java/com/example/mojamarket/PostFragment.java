@@ -1,8 +1,10 @@
 package com.example.mojamarket;
 
 import android.content.res.ColorStateList;
+import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.se.omapi.Session;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,6 +51,7 @@ public class PostFragment extends Fragment {
     private TextView uploadText;
     private TextView uploadSubtext;
     private Uri selectedImageUri;
+
 
     private final ActivityResultLauncher<String> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
