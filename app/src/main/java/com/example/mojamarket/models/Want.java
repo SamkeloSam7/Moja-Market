@@ -1,54 +1,74 @@
 package com.example.mojamarket.models;
+
 import android.content.Context;
-
 import com.example.mojamarket.session.SessionManager;
-import com.example.mojamarket.models.User;
 import com.example.mojamarket.utility.Helper;
-
 import org.json.JSONObject;
-
 import java.util.Date;
+import java.util.UUID;
 
 public class Want {
-    private String wantName, wantDescription;
+    private UUID id;
+    private String item, description;
     private User buyer;
-
-    boolean wantStatus;
+    private boolean wantStatus;
     private double budget;
-
     private final Date datePosted;
 
-    Want(String wantName, String wantDescription, double budget, Context context) {
-        this.wantName = wantName;
-        this.wantDescription = wantDescription;
-        this.buyer = SessionManager.getLoggedInUser(context);
+    public Want(String item, String description, double budget, User buyer) {
+        this.id = UUID.randomUUID();
+        this.item = item;
+        this.description = description;
+        this.buyer = buyer;
         this.budget = budget;
         this.wantStatus = true;
-        this.datePosted =  new Date();
-  ;  }
-
-    public String getWantName() {
-        return wantName;
+        this.datePosted = new Date();
     }
 
-    public void setWantName(String wantName) {
-        this.wantName = wantName;
+    public Want(String item, String description, double budget, User buyer, Date datePosted, UUID id) {
+        this.id = id;
+        this.item = item;
+        this.description = description;
+        this.buyer = buyer;
+        this.budget = budget;
+        this.wantStatus = true;
+        this.datePosted = datePosted;
     }
 
-    public String getWantDescription() {
-        return wantDescription;
+    public UUID getId() {
+        return id;
     }
 
-    public boolean isWantStatus() {
-        return wantStatus;
+    public String getItem() {
+        return item;
+    }
+
+    public void setItem(String item) {
+        this.item = item;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setWantStatus(boolean wantStatus) {
+        this.wantStatus = wantStatus;
     }
 
     public User getBuyer() {
         return buyer;
     }
 
-    public void setWantDescription(String wantDescription) {
-        this.wantDescription = wantDescription;
+    public boolean isWantStatus() {
+        return wantStatus;
+    }
+
+    public void toggleWantStatus() {
+        this.wantStatus = !wantStatus;
     }
 
     public double getBudget() {
@@ -59,15 +79,15 @@ public class Want {
         this.budget = budget;
     }
 
-    public void toggleWantStatus() {
-        this.wantStatus = !wantStatus;
+    public Date getDatePosted() {
+        return datePosted;
     }
 
-    public static Post fromJSONObject(JSONObject json, Context context) {
-        return Helper.postFromJSON(json, context);
+    public static Want fromJSONObject(JSONObject json, Context context) {
+        return Helper.wantFromJSON(json, context);
     }
 
     public JSONObject toJSONObject() {
-        return Helper.postToJSON(this);
+        return Helper.wantToJSON(this);
     }
 }

@@ -25,6 +25,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mojamarket.models.Post;
 import com.example.mojamarket.session.SessionManager;
+import com.example.mojamarket.models.Want;
+
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -153,14 +155,24 @@ public class PostFragment extends Fragment {
 
         postWantButton.setOnClickListener(v -> {
             String itemName = getText(wantItemNameInput);
-            String description = getText(wantDescriptionInput);
-            String budget = getText(wantBudgetInput);
+            String description = wantDescriptionInput.getText().toString().trim();
+            String budgetStr = wantBudgetInput.getText().toString().trim();
 
-            if (TextUtils.isEmpty(itemName) || TextUtils.isEmpty(description) || TextUtils.isEmpty(budget)) {
+            if (TextUtils.isEmpty(itemName) || TextUtils.isEmpty(description) || TextUtils.isEmpty(budgetStr)) {
                 Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            double budget = Double.parseDouble(budgetStr);
+
+            Want want = new Want(
+                    itemName,
+                    description,
+                    budget,
+                    SessionManager.getLoggedInUser(requireContext())
+            );
+
+            SessionManager.getLoggedInUser(requireContext()).postWant(requireContext(), want);
             Toast.makeText(requireContext(), "Want request posted successfully!", Toast.LENGTH_SHORT).show();
         });
     }

@@ -13,11 +13,13 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
+import com.example.mojamarket.models.Post;
+
 public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyListingViewHolder> {
 
-    private final List<Item> itemList;
+    private final List<Post> itemList;
 
-    public MyListingAdapter(List<Item> itemList) {
+    public MyListingAdapter(List<Post> itemList) {
         this.itemList = itemList;
     }
 
@@ -30,16 +32,16 @@ public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyLi
 
     @Override
     public void onBindViewHolder(@NonNull MyListingViewHolder holder, int position) {
-        Item item = itemList.get(position);
+        Post item = itemList.get(position);
 
-        holder.profileListingName.setText(item.getName());
-        holder.profileListingDescription.setText(item.getDescription());
+        holder.profileListingName.setText(item.getItemName());
+        holder.profileListingDescription.setText(item.getItemDescription());
 
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
         holder.profileListingPrice.setText("R" + numberFormat.format((int) item.getPrice()));
-        holder.profileListingRating.setText(String.valueOf(item.getRating()));
+        holder.profileListingRating.setText(String.valueOf(item.getAverageRating()));
 
-        if (item.getStock() > 0) {
+        if (item.getQuantity() > 0) {
             holder.profileListingStatus.setText("Available");
             holder.profileListingStatus.setBackgroundResource(R.drawable.bg_available_badge);
             holder.profileListingStatus.setTextColor(0xFFFFFFFF);
@@ -51,16 +53,15 @@ public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyLi
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), ItemDetailActivity.class);
-            intent.putExtra("item_id", item.getItemId());
-            intent.putExtra("item_name", item.getName());
-            intent.putExtra("item_description", item.getDescription());
+            intent.putExtra("item_id", item.getItemID().toString());
+            intent.putExtra("item_name", item.getItemName());
+            intent.putExtra("item_description", item.getItemDescription());
             intent.putExtra("item_price", item.getPrice());
-            intent.putExtra("item_location", item.getLocation());
+            intent.putExtra("item_location", item.getSellerLocation());
             intent.putExtra("item_condition", item.getCondition());
-            intent.putExtra("item_stock", item.getStock());
-            intent.putExtra("item_image", item.getImageResId());
-            intent.putExtra("item_rating", item.getRating());
-            intent.putExtra("item_seller", item.getSellerUsername());
+            intent.putExtra("item_stock", item.getQuantity());
+            intent.putExtra("item_rating", item.getAverageRating());
+            intent.putExtra("item_seller", item.getSeller().getUsername());
             v.getContext().startActivity(intent);
         });
     }

@@ -18,6 +18,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mojamarket.utility.PostDatabase;
+import com.example.mojamarket.utility.WantDatabase;
+import com.example.mojamarket.models.Want;
+import com.example.mojamarket.models.Post;
+
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -25,6 +30,7 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class ProfileFragment extends Fragment {
 
@@ -52,8 +58,8 @@ public class ProfileFragment extends Fragment {
     private TextView profileListedCount;
     private TextView profileWantedCount;
 
-    private List<Item> myListings;
-    private List<WantRequest> myWants;
+    private List<Post> myListings;
+    private List<Want> myWants;
 
     public ProfileFragment() {
     }
@@ -101,58 +107,10 @@ public class ProfileFragment extends Fragment {
         profileRatingCount.setText("12 ratings");
 
         myListings = new ArrayList<>();
-        myListings.add(new Item(
-                1,
-                "iPhone 13 Pro",
-                "Excellent condition, barely used. Comes with original box and charger.",
-                12000,
-                "Johannesburg",
-                "Used - Excellent",
-                1,
-                android.R.drawable.ic_menu_gallery,
-                4.8,
-                5,
-                "28/03/2026",
-                "samkelo"
-        ));
-
-        myListings.add(new Item(
-                2,
-                "Gaming Laptop",
-                "High performance laptop suitable for gaming, design, and coding.",
-                15000,
-                "Johannesburg",
-                "Used - Good",
-                0,
-                android.R.drawable.ic_menu_gallery,
-                4.7,
-                8,
-                "29/03/2026",
-                "samkelo"
-        ));
+        myListings = PostDatabase.getPosts(requireContext());
 
         myWants = new ArrayList<>();
-        myWants.add(new WantRequest(
-                1,
-                "Samsung Tablet",
-                "Needed mainly for reading PDFs and online classes.",
-                5000,
-                "5 days ago",
-                "samkelo",
-                false,
-                true
-        ));
-
-        myWants.add(new WantRequest(
-                2,
-                "Office Chair",
-                "Need a comfortable office chair for studying at home.",
-                1500,
-                "Yesterday",
-                "samkelo",
-                true,
-                true
-        ));
+        myWants = WantDatabase.getWants(requireContext());
 
         profileListedCount.setText(String.valueOf(myListings.size()));
         profileWantedCount.setText(String.valueOf(myWants.size()));
@@ -163,7 +121,7 @@ public class ProfileFragment extends Fragment {
 
         myWantsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         myWantsRecyclerView.setNestedScrollingEnabled(false);
-        myWantsRecyclerView.setAdapter(new MyWantAdapter(myWants));
+        myWantsRecyclerView.setAdapter(new MyWantAdapter(requireContext(), myWants));
 
         listingsEmptyState.setVisibility(myListings.isEmpty() ? View.VISIBLE : View.GONE);
         myListingsRecyclerView.setVisibility(myListings.isEmpty() ? View.GONE : View.VISIBLE);

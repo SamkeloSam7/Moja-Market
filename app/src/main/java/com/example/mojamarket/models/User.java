@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.mojamarket.utility.Helper;
 import com.example.mojamarket.utility.PostDatabase;
+import com.example.mojamarket.utility.WantDatabase;
 
 import org.json.JSONObject;
 
@@ -92,5 +93,17 @@ public class User {
 
     public JSONObject toJSONObject() {
         return Helper.userToJSON(this);
+    }
+
+    public void postWant(Context context, Want want) {
+        WantDatabase.addWant(context, want);
+    }
+
+    public void updateWant(Context context, Want want) {
+        WantDatabase.updateWant(context, want);
+    }
+
+    public void deleteWant(Context context, Want want) {
+        WantDatabase.deleteWant(context, want.getId().toString());
     }
 }

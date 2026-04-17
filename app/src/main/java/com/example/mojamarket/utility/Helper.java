@@ -11,6 +11,8 @@ import org.json.JSONObject;
 import java.util.Date;
 import java.util.UUID;
 
+import com.example.mojamarket.models.Want;
+
 public class Helper {
     public static JSONObject userToJSON(User user) {
         JSONObject jsonObject = new JSONObject();
@@ -84,6 +86,43 @@ public class Helper {
             );
             post.setAverageRating(json.getDouble("averageRating"));
             return post;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public static JSONObject wantToJSON(Want want) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", want.getId().toString());
+            jsonObject.put("item", want.getItem());
+            jsonObject.put("description", want.getDescription());
+            jsonObject.put("budget", want.getBudget());
+            jsonObject.put("buyer", userToJSON(want.getBuyer()));
+            jsonObject.put("wantStatus", want.isWantStatus());
+            jsonObject.put("datePosted", want.getDatePosted().getTime());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
+    public static Want wantFromJSON(JSONObject json, Context context) {
+        try {
+            User buyer = userFromJSON(json.getJSONObject("buyer"));
+            Date datePosted = new Date(json.getLong("datePosted"));
+            UUID id = UUID.fromString(json.getString("id"));
+
+            Want want = new Want(
+                    json.getString("item"),
+                    json.getString("description"),
+                    json.getDouble("budget"),
+                    buyer,
+                    datePosted,
+                    id
+            );
+            want.setWantStatus(json.getBoolean("wantStatus"));
+            return want;
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

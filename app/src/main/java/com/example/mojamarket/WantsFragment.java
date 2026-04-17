@@ -15,11 +15,14 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.mojamarket.models.Want;
+import com.example.mojamarket.utility.WantDatabase;
+
 public class WantsFragment extends Fragment {
 
     private RecyclerView wantsRecyclerView;
-    private WantRequestAdapter wantRequestAdapter;
-    private List<WantRequest> requestList;
+    private MyWantAdapter wantRequestAdapter;
+    private List<Want> requestList;
 
     public WantsFragment() {
     }
@@ -38,41 +41,9 @@ public class WantsFragment extends Fragment {
         wantsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         requestList = new ArrayList<>();
+        requestList = WantDatabase.getWants(requireContext());
 
-        requestList.add(new WantRequest(
-                1,
-                "iPad 9th Gen",
-                "Looking for one in good condition for school work and notes.",
-                8000,
-                "2 days ago",
-                "yamkela_j",
-                false,
-                false
-        ));
-
-        requestList.add(new WantRequest(
-                2,
-                "Office Chair",
-                "Need a comfortable office chair for studying at home.",
-                1500,
-                "Yesterday",
-                "blessings_k",
-                false,
-                false
-        ));
-
-        requestList.add(new WantRequest(
-                3,
-                "Samsung Tablet",
-                "Needed mainly for reading PDFs and online classes.",
-                5000,
-                "5 days ago",
-                "samkelo_m",
-                true,
-                true
-        ));
-
-        wantRequestAdapter = new WantRequestAdapter(requireContext(), requestList);
+        wantRequestAdapter = new MyWantAdapter(requireContext(), requestList);
         wantsRecyclerView.setAdapter(wantRequestAdapter);
     }
 }

@@ -11,17 +11,21 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.example.mojamarket.models.Want;
+import com.example.mojamarket.session.SessionManager;
 
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
 public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.WantRequestViewHolder> {
 
     private final Context context;
-    private final List<WantRequest> requestList;
+    private final List<Want> requestList;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
-    public WantRequestAdapter(Context context, List<WantRequest> requestList) {
+    public WantRequestAdapter(Context context, List<Want> requestList) {
         this.context = context;
         this.requestList = requestList;
     }
@@ -35,18 +39,23 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull WantRequestViewHolder holder, int position) {
-        WantRequest request = requestList.get(position);
+        Want request = requestList.get(position);
 
-        holder.requestItemName.setText(request.getItemName());
+        holder.requestItemName.setText(request.getItem());
         holder.requestDescription.setText(request.getDescription());
 
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
         holder.requestBudget.setText("Budget: R" + numberFormat.format((int) request.getBudget()));
 
-        holder.requestDate.setText(request.getDatePosted());
-        holder.requestUser.setText("by " + request.getUsername());
+        holder.requestDate.setText(dateFormat.format(request.getDatePosted()));
+        holder.requestUser.setText("by " + request.getBuyer().getUsername());
 
-        if (request.isFulfilled()) {
+        boolean isActive = request.isWantStatus();
+        boolean isOwn = request.getBuyer().getUserID().equals(
+                SessionManager.getLoggedInUser(context).getUserID()
+        );
+
+        if (!isActive) {
             holder.requestStatus.setText("Fulfilled");
             holder.requestStatus.setBackgroundResource(R.drawable.bg_fulfilled_badge);
             holder.requestStatus.setTextColor(0xFF64748B);
@@ -55,32 +64,27 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
             holder.requestStatus.setText("Looking");
             holder.requestStatus.setBackgroundResource(R.drawable.bg_looking_badge);
             holder.requestStatus.setTextColor(0xFFFFFFFF);
-
-            if (request.isOwnRequest()) {
-                holder.respondButton.setVisibility(View.GONE);
-            } else {
-                holder.respondButton.setVisibility(View.VISIBLE);
-            }
+            holder.respondButton.setVisibility(isOwn ? View.GONE : View.VISIBLE);
         }
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, WantDetailActivity.class);
-            intent.putExtra("request_id", request.getRequestId());
-            intent.putExtra("item_name", request.getItemName());
+            intent.putExtra("request_id", request.getId().toString());
+            intent.putExtra("item_name", request.getItem());
             intent.putExtra("description", request.getDescription());
             intent.putExtra("budget", request.getBudget());
-            intent.putExtra("date_posted", request.getDatePosted());
-            intent.putExtra("username", request.getUsername());
-            intent.putExtra("fulfilled", request.isFulfilled());
-            intent.putExtra("own_request", request.isOwnRequest());
+            intent.putExtra("date_posted", dateFormat.format(request.getDatePosted()));
+            intent.putExtra("username", request.getBuyer().getUsername());
+            intent.putExtra("fulfilled", !request.isWantStatus());
+            intent.putExtra("own_request", isOwn);
             context.startActivity(intent);
         });
 
         holder.respondButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, ChatActivity.class);
-            intent.putExtra("user_id", request.getRequestId());
-            intent.putExtra("name", "Samkelo Mthembu");
-            intent.putExtra("username", request.getUsername());
+            intent.putExtra("user_id", request.getBuyer().getUserID().toString());
+            intent.putExtra("name", request.getBuyer().getName());
+            intent.putExtra("username", request.getBuyer().getUsername());
             context.startActivity(intent);
         });
     }
@@ -96,7 +100,6 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
 
         public WantRequestViewHolder(@NonNull View itemView) {
             super(itemView);
-
             requestItemName = itemView.findViewById(R.id.requestItemName);
             requestStatus = itemView.findViewById(R.id.requestStatus);
             requestDescription = itemView.findViewById(R.id.requestDescription);
