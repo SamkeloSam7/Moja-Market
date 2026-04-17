@@ -5,12 +5,17 @@ import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.example.mojamarket.session.SessionManager;
+import com.example.mojamarket.models.Post;
+import com.example.mojamarket.models.User;
 
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class ItemDetailActivity extends AppCompatActivity {
@@ -53,60 +58,48 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        Intent intent = getIntent();
+        Post currentPost = SessionManager.getCurrentClickedItem(this);
 
-        String name = intent.getStringExtra("item_name");
-        String description = intent.getStringExtra("item_description");
-        double price = intent.getDoubleExtra("item_price", 0);
-        String location = intent.getStringExtra("item_location");
-        String condition = intent.getStringExtra("item_condition");
-        int stock = intent.getIntExtra("item_stock", 0);
-        int imageRes = intent.getIntExtra("item_image", android.R.drawable.ic_menu_gallery);
-        double rating = intent.getDoubleExtra("item_rating", 0);
-        int ratingCount = intent.getIntExtra("item_rating_count", 0);
-        String datePosted = intent.getStringExtra("item_date_posted");
-        String seller = intent.getStringExtra("item_seller");
+        if (currentPost == null) {
+            Toast.makeText(this, "Error loading item details.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        if (name == null) name = "Unknown Item";
-        if (description == null) description = "No description available.";
-        if (location == null) location = "Unknown location";
-        if (condition == null) condition = "Unknown condition";
-        if (datePosted == null) datePosted = "Unknown date";
-        if (seller == null) seller = "unknown_user";
+        itemName.setText(currentPost.getItemName());
+        itemDescription.setText(currentPost.getItemDescription());
+        itemLocation.setText(currentPost.getSellerLocation());
+        itemCondition.setText(currentPost.getCondition());
+        itemConditionDetail.setText(currentPost.getCondition());
 
-        itemName.setText(name);
-        itemDescription.setText(description);
-        itemLocation.setText(location);
-        itemCondition.setText(condition);
-        itemConditionDetail.setText(condition);
-        itemDatePosted.setText("Posted on " + datePosted);
-        itemImage.setImageResource(imageRes);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        itemDatePosted.setText("Posted on " + sdf.format(currentPost.getDatePosted()));
 
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
-        itemPrice.setText("R" + numberFormat.format((int) price));
+        itemPrice.setText("R" + numberFormat.format(currentPost.getPrice()));
 
-        if (stock > 0) {
-            itemStatus.setText("In Stock (" + stock + ")");
+        if (currentPost.getQuantity() > 0) {
+            itemStatus.setText(currentPost.getStockStatus() + " (" + currentPost.getQuantity() + ")");
         } else {
             itemStatus.setText("Sold Out");
         }
 
-        sellerName.setText("Samkelo Mthembu");
-        sellerUsername.setText("@" + seller);
+        sellerRating.setText(String.format(Locale.getDefault(), "%.1f", currentPost.getAverageRating()));
 
-        if (ratingCount > 0) {
-            sellerRating.setText(String.format(Locale.getDefault(), "%.1f (%d)", rating, ratingCount));
-        } else {
-            sellerRating.setText(String.format(Locale.getDefault(), "%.1f", rating));
+        User seller = currentPost.getSeller();
+        if (seller != null) {
+            String fullName = seller.getName() + " " + seller.getSurname();
+
+            sellerName.setText(fullName);
+            sellerUsername.setText("@" + seller.getUsername());
+
+            contactSellerButton.setOnClickListener(v -> {
+                Intent chatIntent = new Intent(ItemDetailActivity.this, ChatActivity.class);
+                chatIntent.putExtra("user_id", seller.getUserID().toString());
+                chatIntent.putExtra("name", fullName);
+                chatIntent.putExtra("username", seller.getUsername());
+                startActivity(chatIntent);
+            });
         }
-
-        String finalSeller = seller;
-        contactSellerButton.setOnClickListener(v -> {
-            Intent chatIntent = new Intent(ItemDetailActivity.this, ChatActivity.class);
-            chatIntent.putExtra("user_id", 1);
-            chatIntent.putExtra("name", "Samkelo Mthembu");
-            chatIntent.putExtra("username", finalSeller);
-            startActivity(chatIntent);
-        });
     }
 }

@@ -2,6 +2,7 @@ package com.example.mojamarket;
 
 import android.content.Context;
 import android.content.Intent;
+import android.se.omapi.Session;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,6 +90,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
 
             if (!post.getSeller().getUserID().equals(currentUser.getUserID())) {
                 context.startActivity(intent);
+                SessionManager.setCurrentClickedItem(post);
             } else {
                 Toast.makeText(context, "You can't view your own post", Toast.LENGTH_SHORT).show();
             }
