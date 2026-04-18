@@ -1,11 +1,13 @@
 package com.example.mojamarket;
 
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -16,10 +18,13 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.mojamarket.models.Post;
+import com.example.mojamarket.models.Want;
 import com.example.mojamarket.session.SessionManager;
+
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -29,6 +34,10 @@ public class PostFragment extends Fragment {
 
     private ArrayList<Uri> selectedImages = new ArrayList<>();
 
+    private MaterialButton tabSellItem;
+    private MaterialButton tabWantRequest;
+    private LinearLayout itemFormLayout;
+    private LinearLayout wantFormLayout;
     private LinearLayout uploadBox;
     private TextInputEditText itemNameInput;
     private TextInputEditText itemDescriptionInput;
@@ -37,6 +46,10 @@ public class PostFragment extends Fragment {
     private TextInputEditText itemLocationInput;
     private Spinner itemConditionSpinner;
     private MaterialButton postItemButton;
+    private TextInputEditText wantItemNameInput;
+    private TextInputEditText wantDescriptionInput;
+    private TextInputEditText wantBudgetInput;
+    private MaterialButton postWantButton;
     private ImageView uploadPreviewImage;
     private ImageView uploadIcon;
     private TextView uploadText;
@@ -75,7 +88,13 @@ public class PostFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        tabSellItem = view.findViewById(R.id.tabSellItem);
+        tabWantRequest = view.findViewById(R.id.tabWantRequest);
+
+        itemFormLayout = view.findViewById(R.id.itemFormLayout);
+        wantFormLayout = view.findViewById(R.id.wantFormLayout);
         uploadBox = view.findViewById(R.id.uploadBox);
+
         uploadPreviewImage = view.findViewById(R.id.uploadPreviewImage);
         uploadIcon = view.findViewById(R.id.uploadIcon);
         uploadText = view.findViewById(R.id.uploadText);
@@ -89,6 +108,25 @@ public class PostFragment extends Fragment {
         itemConditionSpinner = view.findViewById(R.id.itemConditionSpinner);
         postItemButton = view.findViewById(R.id.postItemButton);
 
+        wantItemNameInput = view.findViewById(R.id.wantItemNameInput);
+        wantDescriptionInput = view.findViewById(R.id.wantDescriptionInput);
+        wantBudgetInput = view.findViewById(R.id.wantBudgetInput);
+        postWantButton = view.findViewById(R.id.postWantButton);
+
+        String[] conditions = {"New", "Like New", "Good", "Used"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                conditions
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        itemConditionSpinner.setAdapter(adapter);
+
+        showItemForm();
+
+        tabSellItem.setOnClickListener(v -> showItemForm());
+        tabWantRequest.setOnClickListener(v -> showWantForm());
+
         uploadBox.setOnClickListener(v -> imagePickerLauncher.launch("image/*"));
 
         postItemButton.setOnClickListener(v -> {
@@ -100,14 +138,14 @@ public class PostFragment extends Fragment {
 
             if (TextUtils.isEmpty(name) || TextUtils.isEmpty(description) ||
                     TextUtils.isEmpty(price) || TextUtils.isEmpty(stock) || TextUtils.isEmpty(location)) {
-                Toast.makeText(requireContext(), "Fill all fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if (selectedImages.size() < 1) {
-                Toast.makeText(requireContext(), "Upload at least 1 image", Toast.LENGTH_SHORT).show();
-                return;
-            }
+//            if (selectedImages.size() < 1) {
+//                Toast.makeText(requireContext(), "Upload at least 1 image", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
 
             double priceValue = Double.parseDouble(price);
             int stockValue = Integer.parseInt(stock);
@@ -132,7 +170,7 @@ public class PostFragment extends Fragment {
 
             SessionManager.getLoggedInUser(requireContext()).postItem(requireContext(), post);
 
-            Toast.makeText(requireContext(), "Item posted!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Item posted successfully!", Toast.LENGTH_SHORT).show();
 
             selectedImages.clear();
             uploadPreviewImage.setVisibility(View.GONE);
@@ -145,7 +183,61 @@ public class PostFragment extends Fragment {
             itemPriceInput.setText("");
             itemStockInput.setText("");
             itemLocationInput.setText("");
+            itemConditionSpinner.setSelection(0);
         });
+
+        postWantButton.setOnClickListener(v -> {
+            String itemName = getText(wantItemNameInput);
+            String description = getText(wantDescriptionInput);
+            String budgetStr = getText(wantBudgetInput);
+
+            if (TextUtils.isEmpty(itemName) || TextUtils.isEmpty(description) || TextUtils.isEmpty(budgetStr)) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            double budget = Double.parseDouble(budgetStr);
+
+            Want want = new Want(
+                    itemName,
+                    description,
+                    budget,
+                    SessionManager.getLoggedInUser(requireContext())
+            );
+
+            SessionManager.getLoggedInUser(requireContext()).postWant(requireContext(), want);
+            Toast.makeText(requireContext(), "Want request posted successfully!", Toast.LENGTH_SHORT).show();
+
+            wantItemNameInput.setText("");
+            wantDescriptionInput.setText("");
+            wantBudgetInput.setText("");
+        });
+    }
+
+    private void showItemForm() {
+        itemFormLayout.setVisibility(View.VISIBLE);
+        wantFormLayout.setVisibility(View.GONE);
+
+        tabSellItem.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.tab_active_bg)));
+        tabSellItem.setTextColor(ContextCompat.getColor(requireContext(), R.color.tab_active_text));
+
+        tabWantRequest.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.tab_inactive_bg)));
+        tabWantRequest.setTextColor(ContextCompat.getColor(requireContext(), R.color.tab_inactive_text));
+    }
+
+    private void showWantForm() {
+        itemFormLayout.setVisibility(View.GONE);
+        wantFormLayout.setVisibility(View.VISIBLE);
+
+        tabWantRequest.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.tab_active_bg)));
+        tabWantRequest.setTextColor(ContextCompat.getColor(requireContext(), R.color.tab_active_text));
+
+        tabSellItem.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.tab_inactive_bg)));
+        tabSellItem.setTextColor(ContextCompat.getColor(requireContext(), R.color.tab_inactive_text));
     }
 
     private String getText(TextInputEditText input) {
