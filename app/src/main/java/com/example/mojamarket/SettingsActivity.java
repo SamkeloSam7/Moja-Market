@@ -55,12 +55,13 @@ public class SettingsActivity extends AppCompatActivity {
         editAccountButton.setOnClickListener(v -> showEditAccountDialog());
 
         logoutButton.setOnClickListener(v -> {
-            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            prefs.edit().putBoolean(KEY_LOGGED_IN, false).apply();
+            SharedPreferences prefs = getSharedPreferences("MojaMarketPrefs", MODE_PRIVATE);
+            prefs.edit().clear().apply();
 
             Intent intent = new Intent(SettingsActivity.this, OnboardingActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish();
         });
     }
 

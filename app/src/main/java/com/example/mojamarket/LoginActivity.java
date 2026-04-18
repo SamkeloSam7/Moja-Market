@@ -1,20 +1,25 @@
 package com.example.mojamarket;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mojamarket.auth.Login;
+import com.example.mojamarket.models.User;
+import com.example.mojamarket.session.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -23,53 +28,57 @@ public class LoginActivity extends AppCompatActivity {
     private ImageButton backButton;
     private TextView registerText;
     private MaterialButton loginButton;
+
     private TextInputEditText emailInput;
     private TextInputEditText passwordInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         backButton = findViewById(R.id.backButton);
         registerText = findViewById(R.id.registerText);
         loginButton = findViewById(R.id.loginButton);
+
         emailInput = findViewById(R.id.emailInput);
         passwordInput = findViewById(R.id.passwordInput);
-
-        emailInput.setError(null);
-        passwordInput.setError(null);
 
         backButton.setOnClickListener(v -> finish());
 
         loginButton.setOnClickListener(v -> {
-            String loginID = emailInput.getText() != null ? emailInput.getText().toString().trim() : "";
-            String password = passwordInput.getText() != null ? passwordInput.getText().toString().trim() : "";
+            String loginIdentifier = getText(emailInput);
+            String password = getText(passwordInput);
 
-            emailInput.setError(null);
-            passwordInput.setError(null);
-
-            boolean isFormValid = true;
-
-            if (loginID.isEmpty()) {
-                emailInput.setError("Email or Username required");
-                isFormValid = false;
-            }
-            if (password.isEmpty()) {
-                passwordInput.setError("Password required");
-                isFormValid = false;
+            if (TextUtils.isEmpty(loginIdentifier) || TextUtils.isEmpty(password)) {
+                Toast.makeText(this, "Please enter email/username and password", Toast.LENGTH_SHORT).show();
+                return;
             }
 
-            if (!isFormValid) return;
+            boolean success = Login.LoginUserIn(loginIdentifier, password, this);
 
-            boolean isvalidLogin = Login.LoginUserIn(loginID, password, this);
-            if (isvalidLogin) {
+            if (success) {
+                SharedPreferences prefs = getSharedPreferences("MojaMarketPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+
+                editor.putBoolean("isLoggedIn", true);
+                editor.putString("remembered_login_identifier", loginIdentifier);
+
+                User loggedInUser = SessionManager.getLoggedInUser(this);
+                if (loggedInUser != null) {
+                    editor.putString("remembered_name", loggedInUser.getName());
+                    editor.putString("remembered_username", loggedInUser.getUsername());
+                    editor.putString("remembered_email", loggedInUser.getEmail());
+                }
+
+                editor.apply();
+
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             } else {
-                emailInput.setError("Invalid login credentials");
-                passwordInput.setError("Invalid login credentials");
+                Toast.makeText(this, "Invalid login credentials", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -100,5 +109,9 @@ public class LoginActivity extends AppCompatActivity {
         registerText.setText(spannableString);
         registerText.setMovementMethod(LinkMovementMethod.getInstance());
         registerText.setHighlightColor(Color.TRANSPARENT);
+    }
+
+    private String getText(TextInputEditText editText) {
+        return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
 }

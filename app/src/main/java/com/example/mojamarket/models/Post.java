@@ -7,6 +7,7 @@ import com.example.mojamarket.utility.Helper;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -59,6 +60,16 @@ public class Post {
     private Image uploadImage() {
         Image img = null;
         return img;
+    }
+
+    private ArrayList<String> imageUris;
+
+    public ArrayList<String> getImageUris() {
+        return imageUris;
+    }
+
+    public void setImageUris(ArrayList<String> imageUris) {
+        this.imageUris = imageUris;
     }
 
     public UUID getItemID() { return itemID; }

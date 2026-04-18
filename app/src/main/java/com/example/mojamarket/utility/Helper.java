@@ -4,16 +4,18 @@ import android.content.Context;
 
 import com.example.mojamarket.models.Post;
 import com.example.mojamarket.models.User;
+import com.example.mojamarket.models.Want;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
-import com.example.mojamarket.models.Want;
-
 public class Helper {
+
     public static JSONObject userToJSON(User user) {
         JSONObject jsonObject = new JSONObject();
         try {
@@ -60,6 +62,13 @@ public class Helper {
             jsonObject.put("quantity", post.getQuantity());
             jsonObject.put("price", post.getPrice());
             jsonObject.put("averageRating", post.getAverageRating());
+
+            if (post.getImageUris() != null) {
+                jsonObject.put("images", new JSONArray(post.getImageUris()));
+            } else {
+                jsonObject.put("images", new JSONArray());
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -84,13 +93,26 @@ public class Helper {
                     datePosted,
                     itemID
             );
+
             post.setAverageRating(json.getDouble("averageRating"));
+
+            ArrayList<String> images = new ArrayList<>();
+            if (json.has("images")) {
+                JSONArray imagesArray = json.getJSONArray("images");
+                for (int i = 0; i < imagesArray.length(); i++) {
+                    images.add(imagesArray.getString(i));
+                }
+            }
+            post.setImageUris(images);
+
             return post;
+
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
         }
     }
+
     public static JSONObject wantToJSON(Want want) {
         JSONObject jsonObject = new JSONObject();
         try {

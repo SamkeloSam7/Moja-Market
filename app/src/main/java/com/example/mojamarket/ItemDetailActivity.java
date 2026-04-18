@@ -3,103 +3,138 @@ package com.example.mojamarket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.button.MaterialButton;
-import com.example.mojamarket.session.SessionManager;
 import com.example.mojamarket.models.Post;
-import com.example.mojamarket.models.User;
+import com.example.mojamarket.utility.PostDatabase;
+import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Locale;
+import java.util.UUID;
 
 public class ItemDetailActivity extends AppCompatActivity {
 
     private ImageButton backButton;
-    private ImageView itemImage;
-    private TextView itemName;
-    private TextView itemPrice;
-    private TextView itemStatus;
-    private TextView itemCondition;
-    private TextView itemDatePosted;
-    private TextView sellerName;
-    private TextView sellerUsername;
-    private TextView sellerRating;
-    private TextView itemDescription;
-    private TextView itemLocation;
-    private TextView itemConditionDetail;
+    private ViewPager2 itemImageSlider;
+    private TextView imageCounter;
+    private TextView itemName, itemPrice, itemStatus, itemCondition;
+    private TextView sellerName, sellerUsername, sellerRating;
+    private TextView itemDescription, itemLocation, itemConditionDetail, itemDatePosted;
     private MaterialButton contactSellerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_detail);
 
+        // Bind views
         backButton = findViewById(R.id.backButton);
-        itemImage = findViewById(R.id.itemImage);
+        itemImageSlider = findViewById(R.id.itemImageSlider);
+        imageCounter = findViewById(R.id.imageCounter);
         itemName = findViewById(R.id.itemName);
         itemPrice = findViewById(R.id.itemPrice);
         itemStatus = findViewById(R.id.itemStatus);
         itemCondition = findViewById(R.id.itemCondition);
-        itemDatePosted = findViewById(R.id.itemDatePosted);
         sellerName = findViewById(R.id.sellerName);
         sellerUsername = findViewById(R.id.sellerUsername);
         sellerRating = findViewById(R.id.sellerRating);
         itemDescription = findViewById(R.id.itemDescription);
         itemLocation = findViewById(R.id.itemLocation);
         itemConditionDetail = findViewById(R.id.itemConditionDetail);
+        itemDatePosted = findViewById(R.id.itemDatePosted);
         contactSellerButton = findViewById(R.id.contactSellerButton);
 
-        backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        backButton.setOnClickListener(v -> finish());
 
-        Post currentPost = SessionManager.getCurrentClickedItem(this);
+        // 🔴 SAFE POST ID
+        String postIdString = getIntent().getStringExtra("post_id");
 
-        if (currentPost == null) {
-            Toast.makeText(this, "Error loading item details.", Toast.LENGTH_SHORT).show();
+        if (postIdString == null) {
+            Toast.makeText(this, "Post ID missing", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        itemName.setText(currentPost.getItemName());
-        itemDescription.setText(currentPost.getItemDescription());
-        itemLocation.setText(currentPost.getSellerLocation());
-        itemCondition.setText(currentPost.getCondition());
-        itemConditionDetail.setText(currentPost.getCondition());
+        UUID postId;
+        try {
+            postId = UUID.fromString(postIdString);
+        } catch (Exception e) {
+            Toast.makeText(this, "Invalid Post ID", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-        itemDatePosted.setText("Posted on " + sdf.format(currentPost.getDatePosted()));
+        Post post = PostDatabase.getPost(this, postId);
+
+        if (post == null) {
+            Toast.makeText(this, "Post not found", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // Populate UI
+        itemName.setText(post.getItemName());
+        itemDescription.setText(post.getItemDescription());
+        itemLocation.setText(post.getSellerLocation());
+        itemCondition.setText(post.getCondition());
+        itemConditionDetail.setText(post.getCondition());
+        itemDatePosted.setText("Posted on " + post.getDatePosted().toString());
 
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
-        itemPrice.setText("R" + numberFormat.format(currentPost.getPrice()));
+        itemPrice.setText("R" + numberFormat.format(post.getPrice()));
 
-        if (currentPost.getQuantity() > 0) {
-            itemStatus.setText(currentPost.getStockStatus() + " (" + currentPost.getQuantity() + ")");
+        if (post.getQuantity() > 0) {
+            itemStatus.setText("In Stock (" + post.getQuantity() + ")");
         } else {
             itemStatus.setText("Sold Out");
         }
 
-        sellerRating.setText(String.format(Locale.getDefault(), "%.1f", currentPost.getAverageRating()));
-
-        User seller = currentPost.getSeller();
-        if (seller != null) {
-            String fullName = seller.getName() + " " + seller.getSurname();
-
-            sellerName.setText(fullName);
-            sellerUsername.setText("@" + seller.getUsername());
-
-            contactSellerButton.setOnClickListener(v -> {
-                Intent chatIntent = new Intent(ItemDetailActivity.this, ChatActivity.class);
-                chatIntent.putExtra("user_id", seller.getUserID().toString());
-                chatIntent.putExtra("name", fullName);
-                chatIntent.putExtra("username", seller.getUsername());
-                startActivity(chatIntent);
-            });
+        if (post.getSeller() != null) {
+            sellerName.setText(post.getSeller().getName() + " " + post.getSeller().getSurname());
+            sellerUsername.setText("@" + post.getSeller().getUsername());
+        } else {
+            sellerName.setText("Unknown Seller");
+            sellerUsername.setText("@unknown");
         }
+
+        sellerRating.setText(String.format(Locale.getDefault(), "%.1f", post.getAverageRating()));
+
+        // 🔥 SAFE IMAGE HANDLING
+        ArrayList<String> imageUris = post.getImageUris();
+
+        if (imageUris == null) {
+            imageUris = new ArrayList<>();
+        }
+
+        ImageSliderAdapter adapter = new ImageSliderAdapter(this, imageUris);
+        itemImageSlider.setAdapter(adapter);
+
+        if (imageUris.size() == 0) {
+            imageCounter.setText("0 / 0");
+        } else {
+            imageCounter.setText("1 / " + imageUris.size());
+        }
+
+        ArrayList<String> finalImageUris = imageUris;
+        itemImageSlider.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                if (finalImageUris.size() == 0) {
+                    imageCounter.setText("0 / 0");
+                } else {
+                    imageCounter.setText((position + 1) + " / " + finalImageUris.size());
+                }
+            }
+        });
+
+        contactSellerButton.setOnClickListener(v -> {
+            startActivity(new Intent(this, ChatActivity.class));
+        });
     }
 }

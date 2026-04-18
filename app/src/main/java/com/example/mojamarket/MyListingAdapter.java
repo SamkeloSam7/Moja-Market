@@ -1,26 +1,34 @@
 package com.example.mojamarket;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mojamarket.models.Post;
+
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
-import com.example.mojamarket.models.Post;
-
 public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyListingViewHolder> {
 
-    private final List<Post> itemList;
+    public interface OnEditPostClickListener {
+        void onEditPostClick(Post post);
+    }
 
-    public MyListingAdapter(List<Post> itemList) {
-        this.itemList = itemList;
+    private final List<Post> postList;
+    private final OnEditPostClickListener editListener;
+
+    public MyListingAdapter(List<Post> postList, OnEditPostClickListener editListener) {
+        this.postList = postList;
+        this.editListener = editListener;
     }
 
     @NonNull
@@ -32,16 +40,17 @@ public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyLi
 
     @Override
     public void onBindViewHolder(@NonNull MyListingViewHolder holder, int position) {
-        Post item = itemList.get(position);
+        Post post = postList.get(position);
+        Context ctx = holder.itemView.getContext();
 
-        holder.profileListingName.setText(item.getItemName());
-        holder.profileListingDescription.setText(item.getItemDescription());
+        holder.profileListingName.setText(post.getItemName());
+        holder.profileListingDescription.setText(post.getItemDescription());
 
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
-        holder.profileListingPrice.setText("R" + numberFormat.format((int) item.getPrice()));
-        holder.profileListingRating.setText(String.valueOf(item.getAverageRating()));
+        holder.profileListingPrice.setText("R" + numberFormat.format(post.getPrice()));
+        holder.profileListingRating.setText(String.format(Locale.getDefault(), "%.1f", post.getAverageRating()));
 
-        if (item.getQuantity() > 0) {
+        if ("available".equalsIgnoreCase(post.getStockStatus()) || post.getQuantity() > 0) {
             holder.profileListingStatus.setText("Available");
             holder.profileListingStatus.setBackgroundResource(R.drawable.bg_available_badge);
             holder.profileListingStatus.setTextColor(0xFFFFFFFF);
@@ -52,27 +61,26 @@ public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyLi
         }
 
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), ItemDetailActivity.class);
-            intent.putExtra("item_id", item.getItemID().toString());
-            intent.putExtra("item_name", item.getItemName());
-            intent.putExtra("item_description", item.getItemDescription());
-            intent.putExtra("item_price", item.getPrice());
-            intent.putExtra("item_location", item.getSellerLocation());
-            intent.putExtra("item_condition", item.getCondition());
-            intent.putExtra("item_stock", item.getQuantity());
-            intent.putExtra("item_rating", item.getAverageRating());
-            intent.putExtra("item_seller", item.getSeller().getUsername());
-            v.getContext().startActivity(intent);
+            Intent intent = new Intent(ctx, ItemDetailActivity.class);
+            intent.putExtra("post_id", post.getItemID().toString());
+            ctx.startActivity(intent);
+        });
+
+        holder.editListingBtn.setOnClickListener(v -> {
+            if (editListener != null) {
+                editListener.onEditPostClick(post);
+            }
         });
     }
 
     @Override
     public int getItemCount() {
-        return itemList.size();
+        return postList.size();
     }
 
     static class MyListingViewHolder extends RecyclerView.ViewHolder {
         TextView profileListingName, profileListingStatus, profileListingDescription, profileListingPrice, profileListingRating;
+        ImageButton editListingBtn;
 
         public MyListingViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -81,6 +89,7 @@ public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyLi
             profileListingDescription = itemView.findViewById(R.id.profileListingDescription);
             profileListingPrice = itemView.findViewById(R.id.profileListingPrice);
             profileListingRating = itemView.findViewById(R.id.profileListingRating);
+            editListingBtn = itemView.findViewById(R.id.editListingBtn);
         }
     }
 }

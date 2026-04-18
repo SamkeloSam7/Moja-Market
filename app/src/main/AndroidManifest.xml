@@ -32,6 +32,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".QuickLoginActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".LoginActivity"
             android:exported="false" />
 
