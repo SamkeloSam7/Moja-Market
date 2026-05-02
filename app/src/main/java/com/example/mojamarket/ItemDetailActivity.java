@@ -10,13 +10,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.mojamarket.models.Post;
-import com.example.mojamarket.utility.PostDatabase;
+import com.example.mojamarket.session.SessionManager;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.UUID;
 
 public class ItemDetailActivity extends AppCompatActivity {
 
@@ -33,7 +32,6 @@ public class ItemDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_detail);
 
-        // Bind views
         backButton = findViewById(R.id.backButton);
         itemImageSlider = findViewById(R.id.itemImageSlider);
         imageCounter = findViewById(R.id.imageCounter);
@@ -52,25 +50,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         backButton.setOnClickListener(v -> finish());
 
-        // 🔴 SAFE POST ID
-        String postIdString = getIntent().getStringExtra("post_id");
-
-        if (postIdString == null) {
-            Toast.makeText(this, "Post ID missing", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        UUID postId;
-        try {
-            postId = UUID.fromString(postIdString);
-        } catch (Exception e) {
-            Toast.makeText(this, "Invalid Post ID", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        Post post = PostDatabase.getPost(this, postId);
+        Post post = SessionManager.getCurrentClickedItem(this);
 
         if (post == null) {
             Toast.makeText(this, "Post not found", Toast.LENGTH_SHORT).show();
@@ -78,7 +58,6 @@ public class ItemDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Populate UI
         itemName.setText(post.getItemName());
         itemDescription.setText(post.getItemDescription());
         itemLocation.setText(post.getSellerLocation());
@@ -105,9 +84,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         sellerRating.setText(String.format(Locale.getDefault(), "%.1f", post.getAverageRating()));
 
-        // 🔥 SAFE IMAGE HANDLING
         ArrayList<String> imageUris = post.getImageUris();
-
         if (imageUris == null) {
             imageUris = new ArrayList<>();
         }

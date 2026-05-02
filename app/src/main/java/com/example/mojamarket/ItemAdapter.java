@@ -2,19 +2,16 @@ package com.example.mojamarket;
 
 import android.content.Context;
 import android.content.Intent;
-import android.se.omapi.Session;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mojamarket.models.Post;
-import com.example.mojamarket.models.User;
 import com.example.mojamarket.session.SessionManager;
 
 import java.util.List;
@@ -25,11 +22,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     private final Context context;
     private final List<Post> posts;
 
-    private User currentUser;
     public ItemAdapter(Context context, List<Post> posts) {
         this.context = context;
         this.posts = posts;
-        this.currentUser = SessionManager.getLoggedInUser(context);
     }
 
     @NonNull
@@ -69,33 +64,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         holder.itemImage.setImageResource(android.R.drawable.ic_menu_gallery);
 
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ItemDetailActivity.class);
-            intent.putExtra("item_id", post.getItemID().toString());
-            intent.putExtra("item_name", post.getItemName());
-            intent.putExtra("item_description", post.getItemDescription());
-            intent.putExtra("item_price", post.getPrice());
-            intent.putExtra("item_location", post.getSellerLocation());
-            intent.putExtra("item_condition", post.getCondition());
-            intent.putExtra("item_stock", post.getQuantity());
-            intent.putExtra("item_image", android.R.drawable.ic_menu_gallery);
-            intent.putExtra("item_rating", post.getAverageRating());
-            intent.putExtra("item_rating_count", 0);
-            intent.putExtra("item_date_posted", post.getDatePosted().toString());
-            intent.putExtra("item_seller", post.getSeller() != null ? post.getSeller().getUsername() : "unknown");
-
-            if (currentUser == null || post.getSeller() == null) {
-                context.startActivity(intent);
-                return;
-            }
-
-            if (!post.getSeller().getUserID().equals(currentUser.getUserID())) {
-                context.startActivity(intent);
-                SessionManager.setCurrentClickedItem(post);
-            } else {
-                context.startActivity(intent);
-                SessionManager.setCurrentClickedItem(post);
-//                Toast.makeText(context, "You can't view your own post", Toast.LENGTH_SHORT).show();
-            }
+            SessionManager.setCurrentClickedItem(post);
+            context.startActivity(new Intent(context, ItemDetailActivity.class));
         });
     }
 
@@ -110,7 +80,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
 
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
-
             itemImage = itemView.findViewById(R.id.itemImage);
             itemName = itemView.findViewById(R.id.itemName);
             itemDescription = itemView.findViewById(R.id.itemDescription);

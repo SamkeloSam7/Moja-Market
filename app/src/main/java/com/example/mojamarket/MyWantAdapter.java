@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mojamarket.models.Want;
+import com.example.mojamarket.session.SessionManager;
 import com.example.mojamarket.utility.WantDatabase;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -61,12 +62,16 @@ public class MyWantAdapter extends RecyclerView.Adapter<MyWantAdapter.MyWantView
         }
 
         holder.itemView.setOnClickListener(v -> {
+            SessionManager.setCurrentClickedWantRequest(want);
             Intent intent = new Intent(context, WantDetailActivity.class);
             intent.putExtra("want_name", want.getItem());
             context.startActivity(intent);
         });
 
-        holder.editWantBtn.setOnClickListener(v -> showEditWantDialog(want));
+        holder.editWantBtn.setOnClickListener(v -> {
+            SessionManager.setCurrentClickedWantRequest(want);
+            showEditWantDialog(want);
+        });
     }
 
     @Override
@@ -102,11 +107,13 @@ public class MyWantAdapter extends RecyclerView.Adapter<MyWantAdapter.MyWantView
             }
 
             try {
-                want.setItem(name);
-                want.setDescription(description);
-                want.setBudget(Double.parseDouble(budgetText));
+                Want sessionWant = SessionManager.getCurrentClickedWantRequest(context);
 
-                WantDatabase.updateWant(context, want);
+                sessionWant.setItem(name);
+                sessionWant.setDescription(description);
+                sessionWant.setBudget(Double.parseDouble(budgetText));
+
+                WantDatabase.updateWant(context, sessionWant);
                 notifyDataSetChanged();
                 Toast.makeText(context, "Want request updated successfully", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
@@ -116,8 +123,9 @@ public class MyWantAdapter extends RecyclerView.Adapter<MyWantAdapter.MyWantView
         });
 
         deleteWantBtn.setOnClickListener(v -> {
-            WantDatabase.deleteWant(context, want.getItem());
-            wantList.remove(want);
+            Want sessionWant = SessionManager.getCurrentClickedWantRequest(context);
+            WantDatabase.deleteWant(context, sessionWant.getId().toString());
+            wantList.remove(sessionWant);
             notifyDataSetChanged();
             Toast.makeText(context, "Want deleted", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
