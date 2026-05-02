@@ -21,7 +21,7 @@ import com.example.mojamarket.utility.WantDatabase;
 public class WantsFragment extends Fragment {
 
     private RecyclerView wantsRecyclerView;
-    private MyWantAdapter wantRequestAdapter;
+    private WantRequestAdapter wantRequestAdapter;
     private List<Want> requestList;
 
     public WantsFragment() {
@@ -40,10 +40,9 @@ public class WantsFragment extends Fragment {
         wantsRecyclerView = view.findViewById(R.id.wantsRecyclerView);
         wantsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        requestList = new ArrayList<>();
-        requestList = WantDatabase.getWants(requireContext());
+        requestList = new ArrayList<>(WantDatabase.getWants(requireContext()));
 
-        wantRequestAdapter = new MyWantAdapter(requireContext(), requestList);
+        wantRequestAdapter = new WantRequestAdapter(requireContext(), requestList);
         wantsRecyclerView.setAdapter(wantRequestAdapter);
     }
 }

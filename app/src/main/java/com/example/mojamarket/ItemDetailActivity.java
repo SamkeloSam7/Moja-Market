@@ -2,6 +2,7 @@ package com.example.mojamarket;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -110,8 +111,24 @@ public class ItemDetailActivity extends AppCompatActivity {
             }
         });
 
-        contactSellerButton.setOnClickListener(v -> {
-            startActivity(new Intent(this, ChatActivity.class));
-        });
+        boolean isOwnPost = false;
+        if (post.getSeller() != null && SessionManager.getLoggedInUser(this) != null) {
+            isOwnPost = post.getSeller().getUserID()
+                    .equals(SessionManager.getLoggedInUser(this).getUserID());
+        }
+
+        if (isOwnPost) {
+            contactSellerButton.setVisibility(View.GONE);
+        } else {
+            contactSellerButton.setVisibility(View.VISIBLE);
+            contactSellerButton.setOnClickListener(v -> {
+                Intent intent = new Intent(this, ChatActivity.class);
+                if (post.getSeller() != null) {
+                    intent.putExtra("name", post.getSeller().getName() + " " + post.getSeller().getSurname());
+                    intent.putExtra("username", post.getSeller().getUsername());
+                }
+                startActivity(intent);
+            });
+        }
     }
 }

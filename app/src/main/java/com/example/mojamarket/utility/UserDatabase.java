@@ -30,7 +30,7 @@ public class UserDatabase {
             JSONArray jsonArray = loadRawArray(context);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
-                if (obj.has("id") && obj.getString("id").equals(userId)) {
+                if (obj.has("userID") && obj.getString("userID").equals(userId)) {
                     return User.fromJSONObject(obj);
                 }
             }
@@ -59,11 +59,11 @@ public class UserDatabase {
         try {
             JSONArray jsonArray = loadRawArray(context);
             JSONObject updatedObj = updatedUser.toJSONObject();
-            String targetId = updatedObj.getString("id");
+            String targetId = updatedUser.getUserID().toString();
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
-                if (obj.has("id") && obj.getString("id").equals(targetId)) {
+                if (obj.has("userID") && obj.getString("userID").equals(targetId)) {
                     jsonArray.put(i, updatedObj);
                     saveRawArray(context, jsonArray);
                     break;
@@ -79,7 +79,7 @@ public class UserDatabase {
             JSONArray jsonArray = loadRawArray(context);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
-                if (obj.has("id") && obj.getString("id").equals(userId)) {
+                if (obj.has("userID") && obj.getString("userID").equals(userId)) {
                     jsonArray.remove(i);
                     saveRawArray(context, jsonArray);
                     break;

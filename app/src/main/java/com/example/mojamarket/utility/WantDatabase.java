@@ -25,12 +25,12 @@ public class WantDatabase {
         }
     }
 
-    public static Want getWant(Context context, String wantName) {
+    public static Want getWant(Context context, String wantId) {
         try {
             JSONArray jsonArray = loadRawArray(context);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
-                if (obj.has("wantName") && obj.getString("wantName").equals(wantName)) {
+                if (obj.has("id") && obj.getString("id").equals(wantId)) {
                     return Want.fromJSONObject(obj, context);
                 }
             }
@@ -59,11 +59,11 @@ public class WantDatabase {
         try {
             JSONArray jsonArray = loadRawArray(context);
             JSONObject updatedObj = updatedWant.toJSONObject();
-            String targetName = updatedObj.getString("wantName");
+            String targetId = updatedWant.getId().toString();
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
-                if (obj.has("wantName") && obj.getString("wantName").equals(targetName)) {
+                if (obj.has("id") && obj.getString("id").equals(targetId)) {
                     jsonArray.put(i, updatedObj);
                     saveRawArray(context, jsonArray);
                     break;
@@ -74,12 +74,12 @@ public class WantDatabase {
         }
     }
 
-    public static void deleteWant(Context context, String wantName) {
+    public static void deleteWant(Context context, String wantId) {
         try {
             JSONArray jsonArray = loadRawArray(context);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
-                if (obj.has("wantName") && obj.getString("wantName").equals(wantName)) {
+                if (obj.has("id") && obj.getString("id").equals(wantId)) {
                     jsonArray.remove(i);
                     saveRawArray(context, jsonArray);
                     break;
