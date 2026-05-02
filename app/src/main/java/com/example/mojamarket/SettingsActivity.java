@@ -2,7 +2,6 @@ package com.example.mojamarket;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.ImageButton;
@@ -11,17 +10,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mojamarket.models.User;
+import com.example.mojamarket.session.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class SettingsActivity extends AppCompatActivity {
-
-    private static final String PREFS_NAME = "MojaMarketPrefs";
-    private static final String KEY_NAME = "user_name";
-    private static final String KEY_EMAIL = "user_email";
-    private static final String KEY_USERNAME = "user_username";
-    private static final String KEY_LOGGED_IN = "isLoggedIn";
 
     private ImageButton backButton;
     private TextView settingsName;
@@ -31,6 +26,8 @@ public class SettingsActivity extends AppCompatActivity {
     private MaterialButton editAccountButton;
     private MaterialButton logoutButton;
     private MaterialSwitch themeSwitch;
+
+    private String name, surname, username, email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,32 +46,28 @@ public class SettingsActivity extends AppCompatActivity {
 
         backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        loadUserData();
+        User user = SessionManager.getLoggedInUser(this);
+        name = user.getName();
+        surname = user.getSurname();
+        username = user.getUsername();
+        email = user.getEmail();
+
+        settingsName.setText(name + " " + surname);
+        settingsEmail.setText(email);
+        settingsUsername.setText("@" + username);
+
         setupThemeSection();
 
         editAccountButton.setOnClickListener(v -> showEditAccountDialog());
 
         logoutButton.setOnClickListener(v -> {
-            SharedPreferences prefs = getSharedPreferences("MojaMarketPrefs", MODE_PRIVATE);
-            prefs.edit().clear().apply();
+            getSharedPreferences("MojaMarketPrefs", MODE_PRIVATE).edit().clear().apply();
 
             Intent intent = new Intent(SettingsActivity.this, OnboardingActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });
-    }
-
-    private void loadUserData() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
-        String name = prefs.getString(KEY_NAME, "Samkelo Mthembu");
-        String email = prefs.getString(KEY_EMAIL, "samkelosthembiso7@gmail.com");
-        String username = prefs.getString(KEY_USERNAME, "samkelo");
-
-        settingsName.setText(name);
-        settingsEmail.setText(email);
-        settingsUsername.setText("@" + username);
     }
 
     private void setupThemeSection() {
@@ -91,11 +84,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void updateThemeStatusText(boolean isDark) {
-        if (isDark) {
-            themeStatusText.setText("Currently Dark Mode");
-        } else {
-            themeStatusText.setText("Currently Light Mode");
-        }
+        themeStatusText.setText(isDark ? "Currently Dark Mode" : "Currently Light Mode");
     }
 
     private void showEditAccountDialog() {
@@ -106,11 +95,9 @@ public class SettingsActivity extends AppCompatActivity {
         TextInputEditText editUsernameInput = dialogView.findViewById(R.id.editUsernameInput);
         MaterialButton saveAccountChangesButton = dialogView.findViewById(R.id.saveAccountChangesButton);
 
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
-        editNameInput.setText(prefs.getString(KEY_NAME, "Samkelo Mthembu"));
-        editEmailInput.setText(prefs.getString(KEY_EMAIL, "samkelosthembiso7@gmail.com"));
-        editUsernameInput.setText(prefs.getString(KEY_USERNAME, "samkelo"));
+        editNameInput.setText(name);
+        editEmailInput.setText(email);
+        editUsernameInput.setText(username);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
@@ -126,13 +113,10 @@ public class SettingsActivity extends AppCompatActivity {
                 return;
             }
 
-            prefs.edit()
-                    .putString(KEY_NAME, name)
-                    .putString(KEY_EMAIL, email)
-                    .putString(KEY_USERNAME, username)
-                    .apply();
+            settingsName.setText(name + " " + surname);
+            settingsEmail.setText(email);
+            settingsUsername.setText("@" + username);
 
-            loadUserData();
             Toast.makeText(this, "Account updated successfully", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });

@@ -67,16 +67,10 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
             holder.respondButton.setVisibility(isOwn ? View.GONE : View.VISIBLE);
         }
 
+        // FIX: Set the want in SessionManager before navigating so WantDetailActivity can read it
         holder.itemView.setOnClickListener(v -> {
+            SessionManager.setCurrentClickedWantRequest(request);
             Intent intent = new Intent(context, WantDetailActivity.class);
-            intent.putExtra("request_id", request.getId().toString());
-            intent.putExtra("item_name", request.getItem());
-            intent.putExtra("description", request.getDescription());
-            intent.putExtra("budget", request.getBudget());
-            intent.putExtra("date_posted", dateFormat.format(request.getDatePosted()));
-            intent.putExtra("username", request.getBuyer().getUsername());
-            intent.putExtra("fulfilled", !request.isWantStatus());
-            intent.putExtra("own_request", isOwn);
             context.startActivity(intent);
         });
 

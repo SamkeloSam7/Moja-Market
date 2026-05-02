@@ -68,10 +68,7 @@ public class MyWantAdapter extends RecyclerView.Adapter<MyWantAdapter.MyWantView
             context.startActivity(intent);
         });
 
-        holder.editWantBtn.setOnClickListener(v -> {
-            SessionManager.setCurrentClickedWantRequest(want);
-            showEditWantDialog(want);
-        });
+        holder.editWantBtn.setOnClickListener(v -> showEditWantDialog(want));
     }
 
     @Override
@@ -107,13 +104,11 @@ public class MyWantAdapter extends RecyclerView.Adapter<MyWantAdapter.MyWantView
             }
 
             try {
-                Want sessionWant = SessionManager.getCurrentClickedWantRequest(context);
+                want.setItem(name);
+                want.setDescription(description);
+                want.setBudget(Double.parseDouble(budgetText));
 
-                sessionWant.setItem(name);
-                sessionWant.setDescription(description);
-                sessionWant.setBudget(Double.parseDouble(budgetText));
-
-                WantDatabase.updateWant(context, sessionWant);
+                WantDatabase.updateWant(context, want);
                 notifyDataSetChanged();
                 Toast.makeText(context, "Want request updated successfully", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
@@ -123,9 +118,8 @@ public class MyWantAdapter extends RecyclerView.Adapter<MyWantAdapter.MyWantView
         });
 
         deleteWantBtn.setOnClickListener(v -> {
-            Want sessionWant = SessionManager.getCurrentClickedWantRequest(context);
-            WantDatabase.deleteWant(context, sessionWant.getId().toString());
-            wantList.remove(sessionWant);
+            WantDatabase.deleteWant(context, want.getId().toString());
+            wantList.remove(want);
             notifyDataSetChanged();
             Toast.makeText(context, "Want deleted", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
