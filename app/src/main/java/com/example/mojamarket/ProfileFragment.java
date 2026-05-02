@@ -23,7 +23,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mojamarket.models.Post;
+import com.example.mojamarket.models.User;
 import com.example.mojamarket.models.Want;
+import com.example.mojamarket.session.SessionManager;
 import com.example.mojamarket.utility.PostDatabase;
 import com.example.mojamarket.utility.WantDatabase;
 import com.google.android.material.button.MaterialButton;
@@ -62,6 +64,10 @@ public class ProfileFragment extends Fragment {
     private List<Want> myWants;
 
     private Post postBeingEdited;
+
+    private User user;
+
+    private String name, surname, username,email,password, initials;
     private ArrayList<String> editableImages = new ArrayList<>();
     private TextView imageCountTextInDialog;
 
@@ -122,10 +128,18 @@ public class ProfileFragment extends Fragment {
         settingsButton = view.findViewById(R.id.settingsButton);
         logoutButton = view.findViewById(R.id.logoutButton);
 
-        profileSubtitle.setText("@samkelo");
-        profileInitials.setText("SM");
-        profileName.setText("Samkelo Mthembu");
-        profileEmail.setText("samkelosthembiso7@gmail.com");
+        user = SessionManager.getLoggedInUser(requireContext());
+        name = user.getName();
+        username = user.getUsername();
+        surname = user.getSurname();
+        email = user.getEmail();
+        initials = String.valueOf(name.charAt(0)).toUpperCase() + String.valueOf(surname.charAt(0)).toUpperCase();
+
+
+        profileSubtitle.setText("@"+username);
+        profileInitials.setText(initials);
+        profileName.setText(name + " " +surname);
+        profileEmail.setText(email);
         profileRatingValue.setText("4.8");
         profileRatingCount.setText("12 ratings");
 
@@ -236,10 +250,10 @@ public class ProfileFragment extends Fragment {
         TextInputEditText editUsernameInput = dialogView.findViewById(R.id.editUsernameInput);
         MaterialButton saveProfileChangesButton = dialogView.findViewById(R.id.saveProfileChangesButton);
 
-        editNameInput.setText("Samkelo");
-        editSurnameInput.setText("Mthembu");
-        editEmailInput.setText("samkelosthembiso7@gmail.com");
-        editUsernameInput.setText("samkelo");
+        editNameInput.setText(name);
+        editSurnameInput.setText(surname);
+        editEmailInput.setText(email);
+        editUsernameInput.setText(username);
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setView(dialogView)

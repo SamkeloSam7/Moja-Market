@@ -92,7 +92,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
                 context.startActivity(intent);
                 SessionManager.setCurrentClickedItem(post);
             } else {
-                Toast.makeText(context, "You can't view your own post", Toast.LENGTH_SHORT).show();
+                context.startActivity(intent);
+                SessionManager.setCurrentClickedItem(post);
+//                Toast.makeText(context, "You can't view your own post", Toast.LENGTH_SHORT).show();
             }
         });
     }
