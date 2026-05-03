@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mojamarket.auth.Login;
+import com.example.mojamarket.models.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -61,8 +62,6 @@ public class QuickLoginActivity extends AppCompatActivity {
         quickLoginGreeting.setText("Hello again, " + displayName);
         quickLoginSubtitle.setText("Welcome back to Moja Market");
 
-
-
         backButton.setOnClickListener(v -> finish());
 
         signInButton.setOnClickListener(v -> {
@@ -73,19 +72,36 @@ public class QuickLoginActivity extends AppCompatActivity {
                 return;
             }
 
-            boolean success = Login.LoginUserIn(rememberedLoginIdentifier, password, this);
+            signInButton.setEnabled(false);
 
-            if (success) {
-                prefs.edit()
-                        .putBoolean("isLoggedIn", true)
-                        .apply();
+            // async network call replacing the old synchronous local lookup
+            Login.loginUserIn(rememberedLoginIdentifier, password, this, new Login.LoginCallback() {
+                @Override
+                public void onSuccess(User user) {
+                    runOnUiThread(() -> {
+                        signInButton.setEnabled(true);
 
-                Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, MainActivity.class));
-                finish();
-            } else {
-                Toast.makeText(this, "Incorrect password", Toast.LENGTH_SHORT).show();
-            }
+                        prefs.edit()
+                                .putBoolean("isLoggedIn", true)
+                                .putString("remembered_name",     user.getName())
+                                .putString("remembered_username", user.getUsername())
+                                .putString("remembered_email",    user.getEmail())
+                                .apply();
+
+                        Toast.makeText(QuickLoginActivity.this, "Welcome back!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(QuickLoginActivity.this, MainActivity.class));
+                        finish();
+                    });
+                }
+
+                @Override
+                public void onFailure(String message) {
+                    runOnUiThread(() -> {
+                        signInButton.setEnabled(true);
+                        Toast.makeText(QuickLoginActivity.this, "Incorrect password", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
         });
 
         switchAccountButton.setOnClickListener(v -> {
@@ -97,8 +113,7 @@ public class QuickLoginActivity extends AppCompatActivity {
                     .putBoolean("isLoggedIn", false)
                     .apply();
 
-            Intent intent = new Intent(this, WelcomeActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, WelcomeActivity.class));
             finish();
         });
     }

@@ -15,6 +15,7 @@ import okhttp3.Response;
 
 public class ApiClient {
 
+    // callback interface used by all network calls
     public interface ApiCallback {
         void onSuccess(JSONObject response);
         void onFailure(String errorMessage);
@@ -25,6 +26,7 @@ public class ApiClient {
     private static ApiClient instance;
     private final OkHttpClient client;
 
+    // single instance shared across the app
     private ApiClient() {
         client = new OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
@@ -40,6 +42,7 @@ public class ApiClient {
         return instance;
     }
 
+    // sends a JSON body to the given url
     public void post(String url, JSONObject body, ApiCallback callback) {
         RequestBody requestBody = RequestBody.create(body.toString(), JSON);
 
@@ -61,6 +64,7 @@ public class ApiClient {
         });
     }
 
+    // fetches data from the given url with optional query params appended by the caller
     public void get(String url, ApiCallback callback) {
         Request request = new Request.Builder()
                 .url(url)
@@ -80,6 +84,7 @@ public class ApiClient {
         });
     }
 
+    // parses the response body as JSON and routes to success or failure
     private void handleResponse(Response response, ApiCallback callback) throws IOException {
         String rawBody = response.body() != null ? response.body().string() : "";
 

@@ -19,9 +19,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mojamarket.auth.Login;
 import com.example.mojamarket.models.User;
-import com.example.mojamarket.session.SessionManager;
+
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+
+import com.example.mojamarket.auth.Login;
+import com.example.mojamarket.models.User;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -49,37 +52,41 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(v -> {
             String loginIdentifier = getText(emailInput);
-            String password = getText(passwordInput);
+            String password        = getText(passwordInput);
 
             if (TextUtils.isEmpty(loginIdentifier) || TextUtils.isEmpty(password)) {
                 Toast.makeText(this, "Please enter email/username and password", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            boolean success = Login.LoginUserIn(loginIdentifier, password, this);
+            // async network call to call backend
+            Login.loginUserIn(loginIdentifier, password, this, new Login.LoginCallback() {
+                @Override
+                public void onSuccess(User user) {
+                    runOnUiThread(() -> {
 
-            if (success) {
-                SharedPreferences prefs = getSharedPreferences("MojaMarketPrefs", MODE_PRIVATE);
-                SharedPreferences.Editor editor = prefs.edit();
 
-                editor.putBoolean("isLoggedIn", true);
-                editor.putString("remembered_login_identifier", loginIdentifier);
+                        getSharedPreferences("MojaMarketPrefs", MODE_PRIVATE)
+                                .edit()
+                                .putBoolean("isLoggedIn", true)
+                                .putString("remembered_login_identifier", loginIdentifier)
+                                .putString("remembered_name",     user.getName())
+                                .putString("remembered_username", user.getUsername())
+                                .putString("remembered_email",    user.getEmail())
+                                .apply();
 
-                User loggedInUser = SessionManager.getLoggedInUser(this);
-                if (loggedInUser != null) {
-                    editor.putString("remembered_name", loggedInUser.getName());
-                    editor.putString("remembered_username", loggedInUser.getUsername());
-                    editor.putString("remembered_email", loggedInUser.getEmail());
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        finish();
+                    });
                 }
 
-                editor.apply();
-
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                Toast.makeText(this, "Invalid login credentials", Toast.LENGTH_SHORT).show();
-            }
+                @Override
+                public void onFailure(String message) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(LoginActivity.this, "Login failed: " + message, Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
         });
 
         String fullText = "Don't have an account? Register";

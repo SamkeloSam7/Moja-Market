@@ -14,12 +14,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.ActionMenuItem;
 
 import com.example.mojamarket.auth.Register;
 import com.example.mojamarket.utility.Validation;
 import com.example.mojamarket.utility.ValidationResult;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+
+import com.example.mojamarket.models.User;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -102,13 +105,30 @@ public class RegisterActivity extends AppCompatActivity {
             //If errors are found stop
             if (!isFormValid) return;
 
+            createAccountButton.setEnabled(false);
+
             // If input is valid Register the user
-            Register.RegisterUser(name, surname, username, email, password,this);
+            Register.registerUser(name, surname, username, email, password, this,
+                    new Register.RegisterCallback() {
+                        @Override
+                        public void onSuccess(User user) {
+                            runOnUiThread(() -> {
+                                createAccountButton.setEnabled(true);
+                                Toast.makeText(RegisterActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                                finish();
+                            });
+                        }
 
+                        @Override
+                        public void onFailure(String message) {
+                            runOnUiThread(() -> {
+                                createAccountButton.setEnabled(true);
+                                Toast.makeText(RegisterActivity.this, "Registration failed: " + message, Toast.LENGTH_LONG).show();
+                            });
+                        }
+                    });
 
-            Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
         });
         String fullText = "Already have an account? Login";
         SpannableString spannableString = new SpannableString(fullText);
@@ -143,4 +163,5 @@ public class RegisterActivity extends AppCompatActivity {
     private String getText(TextInputEditText editText) {
         return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
+
 }

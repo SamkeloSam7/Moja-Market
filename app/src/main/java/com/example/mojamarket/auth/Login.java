@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.mojamarket.models.User;
 import com.example.mojamarket.session.SessionManager;
+import com.example.mojamarket.network.AuthRepository;
 import com.example.mojamarket.utility.UserDatabase;
 
 import java.util.ArrayList;
