@@ -10,18 +10,25 @@ import java.util.ArrayList;
 
 public class Login {
 
-    public static boolean LoginUserIn(String loginID, String password, Context context) {
+    public interface LoginCallback {
+        void onSuccess(User user);
+        void onFailure(String message);
+    }
 
-        ArrayList<User> users = UserDatabase.getUsers(context);
-
-        for (User user : users) {
-            if ((loginID.equals(user.getEmail()) || loginID.equals(user.getUsername()))
-                    && password.equals(user.getPassword())) {
-
+    // calls the backend and stores the logged in user in session
+    public static void loginUserIn(String loginID, String password,
+                                   Context context, LoginCallback callback) {
+        AuthRepository.login(loginID, password, new AuthRepository.AuthCallback() {
+            @Override
+            public void onSuccess(User user) {
                 SessionManager.setLoggedInUser(user);
-                return true;
+                callback.onSuccess(user);
             }
-        }
-        return false;
+
+            @Override
+            public void onFailure(String message) {
+                callback.onFailure(message);
+            }
+        });
     }
 }
