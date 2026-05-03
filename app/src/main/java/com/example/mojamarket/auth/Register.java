@@ -1,18 +1,32 @@
 package com.example.mojamarket.auth;
+
 import android.content.Context;
 
 import com.example.mojamarket.models.User;
-import com.example.mojamarket.utility.UserDatabase;
-
-import org.json.JSONObject;
+import com.example.mojamarket.network.AuthRepository;
 
 public class Register {
-    private String name, surname, username, email, password;
-    User user;
-    public static void RegisterUser(String name, String surname,String username,String email, String password, Context context) {
-        User newUser = new User(name,surname,username,email,password);
-        //Add the user to the local JSON data for testing
-        JSONObject user = newUser.toJSONObject();
-        UserDatabase.addUser(context, User.fromJSONObject(user));
+
+    public interface RegisterCallback {
+        void onSuccess(User user);
+        void onFailure(String message);
+    }
+
+    // sends user details to the backend and returns the created user
+    public static void registerUser(String name, String surname, String username,
+                                    String email, String password,
+                                    Context context, RegisterCallback callback) {
+        AuthRepository.register(name, surname, username, email, password,
+                new AuthRepository.AuthCallback() {
+                    @Override
+                    public void onSuccess(User user) {
+                        callback.onSuccess(user);
+                    }
+
+                    @Override
+                    public void onFailure(String message) {
+                        callback.onFailure(message);
+                    }
+                });
     }
 }
