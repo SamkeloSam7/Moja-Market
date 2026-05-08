@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.mojamarket.models.Post;
+import com.example.mojamarket.network.PostRepository;
 import com.example.mojamarket.session.SessionManager;
 import com.google.android.material.button.MaterialButton;
 
@@ -51,14 +52,35 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         backButton.setOnClickListener(v -> finish());
 
-        Post post = SessionManager.getCurrentClickedItem(this);
+        String itemID = getIntent().getStringExtra("ITEM_ID");
 
-        if (post == null) {
-            Toast.makeText(this, "Post not found", Toast.LENGTH_SHORT).show();
+        if (itemID == null) {
+            Toast.makeText(this, "Item ID not found", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        loadItemDetails(itemID);
+    }
+
+    private void loadItemDetails(String id) {
+        PostRepository.getItem(id, new PostRepository.PostCallback() {
+            @Override
+            public void onSuccess(Post post) {
+                runOnUiThread(() -> populateUI(post));
+            }
+
+            @Override
+            public void onFailure(String message) {
+                runOnUiThread(() -> {
+                    Toast.makeText(ItemDetailActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
+                    finish();
+                });
+            }
+        });
+    }
+
+    private void populateUI(Post post) {
         itemName.setText(post.getItemName());
         itemDescription.setText(post.getItemDescription());
         itemLocation.setText(post.getSellerLocation());
@@ -86,9 +108,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         sellerRating.setText(String.format(Locale.getDefault(), "%.1f", post.getAverageRating()));
 
         ArrayList<String> imageUris = post.getImageUris();
-        if (imageUris == null) {
-            imageUris = new ArrayList<>();
-        }
+        if (imageUris == null) imageUris = new ArrayList<>();
 
         ImageSliderAdapter adapter = new ImageSliderAdapter(this, imageUris);
         itemImageSlider.setAdapter(adapter);

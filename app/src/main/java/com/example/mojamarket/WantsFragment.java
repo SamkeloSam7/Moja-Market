@@ -1,6 +1,7 @@
 package com.example.mojamarket;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +52,10 @@ public class WantsFragment extends Fragment {
                     requestList.clear();
                     requestList.addAll(result);
                     wantRequestAdapter.notifyDataSetChanged();
+
+                    if (result.isEmpty()) {
+                        Toast.makeText(requireContext(), "No wants found", Toast.LENGTH_SHORT).show();
+                    }
                 });
             }
 
@@ -58,7 +63,8 @@ public class WantsFragment extends Fragment {
             public void onFailure(String message) {
                 if (!isAdded()) return;
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "Failed to load wants: " + message, Toast.LENGTH_SHORT).show();
+                    Log.e("WantsFragment", "Feed error: " + message);
+                    Toast.makeText(requireContext(), "Failed to load wants: " + message, Toast.LENGTH_LONG).show();
                 });
             }
         });

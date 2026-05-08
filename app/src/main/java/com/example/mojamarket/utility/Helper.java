@@ -53,7 +53,7 @@ public class Helper {
         try {
             jsonObject.put("itemID", post.getItemID().toString());
             jsonObject.put("seller", userToJSON(post.getSeller()));
-            jsonObject.put("datePosted", post.getDatePosted().getTime());
+            jsonObject.put("datePosted", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(post.getDatePosted()));
             jsonObject.put("itemName", post.getItemName());
             jsonObject.put("itemDescription", post.getItemDescription());
             jsonObject.put("condition", post.getCondition());
@@ -122,7 +122,7 @@ public class Helper {
             jsonObject.put("budget", want.getBudget());
             jsonObject.put("buyer", userToJSON(want.getBuyer()));
             jsonObject.put("wantStatus", want.isWantStatus());
-            jsonObject.put("datePosted", want.getDatePosted().getTime());
+            jsonObject.put("datePosted", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(want.getDatePosted()));
         } catch (JSONException e) {
             e.printStackTrace();
         }

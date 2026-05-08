@@ -1,6 +1,7 @@
 package com.example.mojamarket;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +52,9 @@ public class HomeFragment extends Fragment {
                     posts.clear();
                     posts.addAll(result);
                     itemAdapter.notifyDataSetChanged();
+                    if (result.isEmpty()) {
+                        Toast.makeText(requireContext(), "No posts found", Toast.LENGTH_SHORT).show();
+                    }
                 });
             }
 
@@ -58,7 +62,8 @@ public class HomeFragment extends Fragment {
             public void onFailure(String message) {
                 if (!isAdded()) return;
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "Failed to load feed: " + message, Toast.LENGTH_SHORT).show();
+                    Log.e("HomeFragment", "Feed error: " + message);
+                    Toast.makeText(requireContext(), "Failed to load feed: " + message, Toast.LENGTH_LONG).show();
                 });
             }
         });

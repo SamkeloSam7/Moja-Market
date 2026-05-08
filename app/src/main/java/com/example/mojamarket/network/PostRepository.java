@@ -1,11 +1,10 @@
 package com.example.mojamarket.network;
 
+import android.util.Log;
 import com.example.mojamarket.models.Post;
 import com.example.mojamarket.models.User;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,10 +32,12 @@ public class PostRepository {
             @Override
             public void onSuccess(JSONObject response) {
                 try {
+                    Log.d("PostRepository", "Raw feed response: " + response.toString());
                     if (!response.getBoolean("success")) {
                         callback.onFailure(response.optString("message", "Failed to load feed"));
                         return;
                     }
+
                     JSONArray arr = response.getJSONArray("data");
                     List<Post> posts = new ArrayList<>();
                     for (int i = 0; i < arr.length(); i++) {
@@ -70,7 +71,11 @@ public class PostRepository {
                             return;
                         }
                         JSONArray arr = response.getJSONArray("data");
-                        callback.onSuccess(postFromRow(arr.getJSONObject(0)));
+                        if (arr.length() > 0) {
+                            callback.onSuccess(postFromRow(arr.getJSONObject(0)));
+                        } else {
+                            callback.onFailure("Item details are empty");
+                        }
                     } catch (Exception e) {
                         callback.onFailure("Failed to parse item: " + e.getMessage());
                     }
@@ -121,28 +126,48 @@ public class PostRepository {
         }
     }
 
-    // Package-private so UserRepository can access it within the same package
     static Post postFromRow(JSONObject row) {
         try {
-            User seller = new User("", "", "", "", "");
-            seller.setUserID(row.optString("user_id", UUID.randomUUID().toString()));
+            String userID = row.optString("user_id", "");
+            String name = row.optString("name", "");
+            String surname = row.optString("surname", "");
+            String username = row.optString("username", "unknown");
 
-            // sql.Timestamp.valueOf expects "yyyy-MM-dd HH:mm:ss" format
-            Date date = new Date(
-                    java.sql.Timestamp.valueOf(
-                            row.optString("date_posted", "2000-01-01 00:00:00")).getTime());
+            if (userID.isEmpty()) userID = UUID.randomUUID().toString();
+
+            User seller = new User(name, surname, username, "", "");
+            seller.setUserID(userID);
+
+            Date date;
+            try {
+                String rawDate = row.optString("date_posted", "2000-01-01 00:00:00").trim();
+                if (rawDate.contains(".")) rawDate = rawDate.substring(0, rawDate.indexOf('.'));
+                if (rawDate.contains("+")) rawDate = rawDate.substring(0, rawDate.indexOf('+'));
+                if (rawDate.contains("T")) rawDate = rawDate.replace("T", " ");
+                date = new Date(java.sql.Timestamp.valueOf(rawDate).getTime());
+            } catch (Exception e) {
+                date = new Date();
+            }
+
+            UUID itemUUID;
+            try {
+                String idStr = row.optString("item_id", "");
+                itemUUID = idStr.isEmpty() ? UUID.randomUUID() : UUID.fromString(idStr);
+            } catch (Exception e) {
+                itemUUID = UUID.randomUUID();
+            }
 
             Post post = new Post(
-                    row.optString("item_name"),
-                    row.optString("item_description"),
-                    row.optString("item_condition"),
-                    row.optDouble("item_price", 0),
+                    row.optString("item_name", "Untitled Item"),
+                    row.optString("item_description", ""),
+                    row.optString("item_condition", ""),
+                    row.optDouble("item_price", 0.0),
                     row.optInt("stock_amount", 0),
-                    row.optString("status"),
-                    row.optString("location"),
+                    row.optString("status", ""),
+                    row.optString("location", ""),
                     seller,
                     date,
-                    UUID.fromString(row.optString("item_id", UUID.randomUUID().toString()))
+                    itemUUID
             );
 
             ArrayList<String> images = new ArrayList<>();
@@ -151,8 +176,9 @@ public class PostRepository {
             }
             post.setImageUris(images);
             return post;
+
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("PostRepository", "postFromRow failed: " + e.getMessage());
             return null;
         }
     }

@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mojamarket.models.Post;
-import com.example.mojamarket.session.SessionManager;
 
 import java.util.List;
 import java.util.Locale;
@@ -46,7 +45,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         holder.itemSeller.setText("by " + (post.getSeller() != null ? post.getSeller().getUsername() : "unknown"));
 
         if (post.getAverageRating() > 0) {
-            holder.itemRating.setText(String.format(Locale.getDefault(), "%.1f (%d)", post.getAverageRating(), 0));
+            holder.itemRating.setText(String.format(Locale.getDefault(), "%.1f", post.getAverageRating()));
         } else {
             holder.itemRating.setText("0.0");
         }
@@ -64,8 +63,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         holder.itemImage.setImageResource(android.R.drawable.ic_menu_gallery);
 
         holder.itemView.setOnClickListener(v -> {
-            SessionManager.setCurrentClickedItem(post);
-            context.startActivity(new Intent(context, ItemDetailActivity.class));
+            Intent intent = new Intent(context, ItemDetailActivity.class);
+            intent.putExtra("ITEM_ID", post.getItemID().toString());
+            context.startActivity(intent);
         });
     }
 

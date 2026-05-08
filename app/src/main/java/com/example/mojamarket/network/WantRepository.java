@@ -1,5 +1,7 @@
 package com.example.mojamarket.network;
 
+import android.util.Log;
+
 import com.example.mojamarket.models.User;
 import com.example.mojamarket.models.Want;
 
@@ -28,24 +30,34 @@ public class WantRepository {
             @Override
             public void onSuccess(JSONObject response) {
                 try {
+                    Log.d("WantRepository", "Raw feed response: " + response.toString());
+
                     if (!response.getBoolean("success")) {
                         callback.onFailure(response.optString("message", "Failed to load wants"));
                         return;
                     }
+
                     JSONArray arr = response.getJSONArray("data");
+                    Log.d("WantRepository", "Feed array length: " + arr.length());
+
                     List<Want> wants = new ArrayList<>();
                     for (int i = 0; i < arr.length(); i++) {
-                        Want w = wantFromRow(arr.getJSONObject(i));
+                        JSONObject row = arr.getJSONObject(i);
+                        Log.d("WantRepository", "Row " + i + ": " + row.toString());
+                        Want w = wantFromRow(row);
+                        Log.d("WantRepository", "Want " + i + " parsed: " + (w != null ? w.getItem() : "NULL - FAILED TO PARSE"));
                         if (w != null) wants.add(w);
                     }
                     callback.onSuccess(wants);
                 } catch (Exception e) {
+                    Log.e("WantRepository", "Parse exception: " + e.getMessage(), e);
                     callback.onFailure("Failed to parse wants: " + e.getMessage());
                 }
             }
 
             @Override
             public void onFailure(String errorMessage) {
+                Log.e("WantRepository", "Network failure: " + errorMessage);
                 callback.onFailure(errorMessage);
             }
         });
@@ -80,29 +92,52 @@ public class WantRepository {
     // Package-private so UserRepository can access it within the same package
     static Want wantFromRow(JSONObject row) {
         try {
-            User buyer = new User("Unknown", "", "unknown", "", "");
-            buyer.setUserID(row.optString("user_id", UUID.randomUUID().toString()));
+            String userID   = row.optString("user_id", "");
+            String name     = row.optString("name", "");
+            String surname  = row.optString("surname", "");
+            String username = row.optString("username", "unknown");
 
-            // sql.Timestamp.valueOf expects "yyyy-MM-dd HH:mm:ss" format
-            Date date = new Date(
-                    java.sql.Timestamp.valueOf(
-                            row.optString("date_posted", "2000-01-01 00:00:00")).getTime());
+            if (userID.isEmpty()) userID = UUID.randomUUID().toString();
 
-            UUID id = UUID.fromString(row.optString("wants_id", UUID.randomUUID().toString()));
+            User buyer = new User(name, surname, username, "", "");
+            buyer.setUserID(userID);
+
+            Date date;
+            try {
+                String rawDate = row.optString("date_posted", "2000-01-01 00:00:00");
+                rawDate = rawDate.trim();
+                if (rawDate.contains(".")) rawDate = rawDate.substring(0, rawDate.indexOf('.'));
+                if (rawDate.contains("+")) rawDate = rawDate.substring(0, rawDate.indexOf('+'));
+                if (rawDate.contains("T")) rawDate = rawDate.replace("T", " ");
+                date = new Date(java.sql.Timestamp.valueOf(rawDate).getTime());
+            } catch (Exception e) {
+                Log.e("WantRepository", "Date parse failed: " + e.getMessage());
+                date = new Date();
+            }
+
+            UUID id;
+            try {
+                id = UUID.fromString(row.optString("wants_id", ""));
+            } catch (Exception e) {
+                Log.e("WantRepository", "UUID parse failed for wants_id: " + row.optString("wants_id", "none"));
+                id = UUID.randomUUID();
+            }
 
             Want want = new Want(
-                    row.optString("item_name"),
-                    row.optString("item_description"),
+                    row.optString("item_name", ""),
+                    row.optString("item_description", ""),
                     row.optDouble("budget", 0),
                     buyer,
                     date,
                     id
             );
+
             // "false" string explicitly means inactive; anything else (including "true") is active
             want.setWantStatus(!"false".equalsIgnoreCase(row.optString("status", "true")));
             return want;
+
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("WantRepository", "wantFromRow failed: " + e.getMessage(), e);
             return null;
         }
     }
