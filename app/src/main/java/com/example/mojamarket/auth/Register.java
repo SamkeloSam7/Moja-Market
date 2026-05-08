@@ -25,6 +25,7 @@ public class Register {
 
                     @Override
                     public void onFailure(String message) {
+                        android.util.Log.e("AuthRepo", "Register failed: " + message);
                         callback.onFailure(message);
                     }
                 });

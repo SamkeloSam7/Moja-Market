@@ -2,7 +2,8 @@ package com.example.mojamarket.network;
 
 public class ApiConstants {
 
-    public static final String BASE_URL = "https://moja-market-backend-2.onrender.com";
+//    public static final String BASE_URL = "https://moja-market-backend.onrender.com";
+    public static final String BASE_URL = "http://10.129.34.12:8000";
 
     // Auth
     public static final String LOGIN    = BASE_URL + "/api/auth/login";

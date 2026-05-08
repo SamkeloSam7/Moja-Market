@@ -16,10 +16,10 @@ public class User {
     private String username;
     private String email;
     private String password;
-    private UUID userID;
+    private String userID;
 
     public User(String name, String surname, String username, String email, String password) {
-        this.userID = UUID.randomUUID();
+        this.userID = UUID.randomUUID().toString();
         this.name = name;
         this.surname = surname;
         this.username = username;
@@ -27,7 +27,7 @@ public class User {
         this.password = password;
     }
 
-    public UUID getUserID() {
+    public String getUserID() {
         return userID;
     }
 
@@ -51,7 +51,7 @@ public class User {
         return email;
     }
 
-    public void setUserID(UUID userID) {
+    public void setUserID(String userID) {
         this.userID = userID;
     }
 

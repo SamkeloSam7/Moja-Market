@@ -23,10 +23,14 @@ public class AuthRepository {
                 @Override
                 public void onSuccess(JSONObject response) {
                     try {
-                        boolean success = response.getBoolean("success");
-
-                        if (!success) {
+                        if (!response.optBoolean("success", false)) {
                             callback.onFailure(response.optString("message", "Login failed"));
+                            return;
+                        }
+
+                        // data must be present and non-null for login
+                        if (!response.has("data") || response.isNull("data")) {
+                            callback.onFailure("Login error: server returned no user data");
                             return;
                         }
 
@@ -46,7 +50,7 @@ public class AuthRepository {
             });
 
         } catch (Exception e) {
-            callback.onFailure("Failed to build request: " + e.getMessage());
+            callback.onFailure("Failed to build login request: " + e.getMessage());
         }
     }
 
@@ -67,15 +71,14 @@ public class AuthRepository {
                 @Override
                 public void onSuccess(JSONObject response) {
                     try {
-                        boolean success = response.getBoolean("success");
-
-                        if (!success) {
+                        if (!response.optBoolean("success", false)) {
                             callback.onFailure(response.optString("message", "Registration failed"));
                             return;
                         }
 
+                        // data is null on register — build User from what we sent
                         User user = new User(name, surname, username, email, password);
-                        user.setUserID(UUID.fromString(userID));
+                        user.setUserID(userID);
                         callback.onSuccess(user);
 
                     } catch (Exception e) {
@@ -90,19 +93,24 @@ public class AuthRepository {
             });
 
         } catch (Exception e) {
-            callback.onFailure("Failed to build request: " + e.getMessage());
+            callback.onFailure("Failed to build register request: " + e.getMessage());
         }
     }
 
     private static User userFromJson(JSONObject data) throws Exception {
+        String rawID = data.optString("user_id", data.optString("userID", ""));
+        if (rawID.isEmpty()) {
+            throw new Exception("user_id missing from login response");
+        }
+
         User user = new User(
                 data.getString("name"),
                 data.getString("surname"),
                 data.getString("username"),
                 data.getString("email"),
-                data.getString("password")
+                data.optString("password", "") // password may not come back from server
         );
-        user.setUserID(UUID.fromString(data.getString("user_id")));
+        user.setUserID(rawID);
         return user;
     }
 }

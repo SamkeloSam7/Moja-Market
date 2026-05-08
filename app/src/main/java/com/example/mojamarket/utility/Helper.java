@@ -40,7 +40,7 @@ public class Helper {
                     json.getString("email"),
                     json.getString("password")
             );
-            user.setUserID(UUID.fromString(json.getString("userID")));
+            user.setUserID(json.getString("userID"));
             return user;
         } catch (JSONException e) {
             e.printStackTrace();
