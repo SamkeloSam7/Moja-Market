@@ -2,8 +2,8 @@ package com.example.mojamarket.network;
 
 public class ApiConstants {
 
-//    public static final String BASE_URL = "https://moja-market-backend.onrender.com";
-    public static final String BASE_URL = "http://10.129.34.12:8000";
+    public static final String BASE_URL = "https://moja-market-backend.onrender.com";
+//    public static final String BASE_URL = "http://10.129.34.12:8000";
 
     // Auth
     public static final String LOGIN    = BASE_URL + "/api/auth/login";
@@ -26,4 +26,11 @@ public class ApiConstants {
 
     // Upload
     public static final String UPLOAD_IMAGE = BASE_URL + "/api/upload";
+
+    // Chat
+    public static final String CHAT_CREATE   = BASE_URL + "api/chat/create";
+    public static final String CHAT_SEND     = BASE_URL + "api/chat/send";
+    public static final String CHAT_HISTORY  = BASE_URL + "api/chat/history";
+    public static final String CHAT_MESSAGES = BASE_URL + "api/chat/messages";
+    public static final String CHAT_LIST     = BASE_URL + "api/chat/list";
 }

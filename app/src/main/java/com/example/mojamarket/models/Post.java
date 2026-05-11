@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public class Post {
-    private final UUID itemID;
+    private final String itemID;
     private final User seller;
     private final Date datePosted;
 
@@ -27,7 +27,7 @@ public class Post {
     private Image itemImage;
 
     public Post(String itemName, String itemDescription, String condition, double price, int quantity, String stockStatus, String sellerLocation, Context context) {
-        this.itemID = UUID.randomUUID();
+        this.itemID = UUID.randomUUID().toString();
         this.seller = SessionManager.getLoggedInUser(context);
         this.datePosted = new Date();
 
@@ -42,7 +42,7 @@ public class Post {
         this.averageRating = 0.0;
     }
 
-    public Post(String itemName, String itemDescription, String condition, double price, int quantity, String stockStatus, String sellerLocation, User seller, Date datePosted, UUID itemID) {
+    public Post(String itemName, String itemDescription, String condition, double price, int quantity, String stockStatus, String sellerLocation, User seller, Date datePosted, String itemID) {
         this.itemID = itemID;
         this.seller = seller;
         this.datePosted = datePosted;
@@ -72,7 +72,7 @@ public class Post {
         this.imageUris = imageUris;
     }
 
-    public UUID getItemID() { return itemID; }
+    public String getItemID() { return itemID; }
     public User getSeller() { return seller; }
     public Date getDatePosted() { return datePosted; }
     public String getItemName() { return itemName; }

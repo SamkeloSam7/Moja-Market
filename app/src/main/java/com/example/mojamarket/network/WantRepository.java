@@ -89,9 +89,14 @@ public class WantRepository {
         }
     }
 
-    // Package-private so UserRepository can access it within the same package
     static Want wantFromRow(JSONObject row) {
         try {
+            String id = row.optString("wants_id", "").trim();
+            if (id.isEmpty()) {
+                Log.e("WantRepository", "Dropped want: Missing database ID (wants_id)");
+                return null;
+            }
+
             String userID   = row.optString("user_id", "");
             String name     = row.optString("name", "");
             String surname  = row.optString("surname", "");
@@ -115,14 +120,6 @@ public class WantRepository {
                 date = new Date();
             }
 
-            UUID id;
-            try {
-                id = UUID.fromString(row.optString("wants_id", ""));
-            } catch (Exception e) {
-                Log.e("WantRepository", "UUID parse failed for wants_id: " + row.optString("wants_id", "none"));
-                id = UUID.randomUUID();
-            }
-
             Want want = new Want(
                     row.optString("item_name", ""),
                     row.optString("item_description", ""),
@@ -132,7 +129,7 @@ public class WantRepository {
                     id
             );
 
-            // "false" string explicitly means inactive; anything else (including "true") is active
+            // "false" string means inactive true is active
             want.setWantStatus(!"false".equalsIgnoreCase(row.optString("status", "true")));
             return want;
 

@@ -6,15 +6,12 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
-
 import com.example.mojamarket.models.Post;
-import com.example.mojamarket.network.PostRepository;
 import com.example.mojamarket.session.SessionManager;
+import com.example.mojamarket.network.ChatRepository;
 import com.google.android.material.button.MaterialButton;
-
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -23,10 +20,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     private ImageButton backButton;
     private ViewPager2 itemImageSlider;
-    private TextView imageCounter;
-    private TextView itemName, itemPrice, itemStatus, itemCondition;
-    private TextView sellerName, sellerUsername, sellerRating;
-    private TextView itemDescription, itemLocation, itemConditionDetail, itemDatePosted;
+    private TextView imageCounter, itemName, itemPrice, itemStatus, itemDescription, itemLocation, sellerName, sellerUsername;
     private MaterialButton contactSellerButton;
 
     @Override
@@ -34,121 +28,85 @@ public class ItemDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_detail);
 
+        // Connects XML layout components to Java variables
+        initializeViews();
+
+        Post post = SessionManager.getCurrentClickedItem(this);
+        if (post != null) {
+            // Displays post details immediately from the session object
+            renderPostDetails(post);
+        } else {
+            finish();
+        }
+    }
+
+    // Maps UI elements and initializes the back button listener
+    private void initializeViews() {
         backButton = findViewById(R.id.backButton);
         itemImageSlider = findViewById(R.id.itemImageSlider);
         imageCounter = findViewById(R.id.imageCounter);
         itemName = findViewById(R.id.itemName);
         itemPrice = findViewById(R.id.itemPrice);
         itemStatus = findViewById(R.id.itemStatus);
-        itemCondition = findViewById(R.id.itemCondition);
-        sellerName = findViewById(R.id.sellerName);
-        sellerUsername = findViewById(R.id.sellerUsername);
-        sellerRating = findViewById(R.id.sellerRating);
         itemDescription = findViewById(R.id.itemDescription);
         itemLocation = findViewById(R.id.itemLocation);
-        itemConditionDetail = findViewById(R.id.itemConditionDetail);
-        itemDatePosted = findViewById(R.id.itemDatePosted);
+        sellerName = findViewById(R.id.sellerName);
+        sellerUsername = findViewById(R.id.sellerUsername);
         contactSellerButton = findViewById(R.id.contactSellerButton);
-
         backButton.setOnClickListener(v -> finish());
-
-        String itemID = getIntent().getStringExtra("ITEM_ID");
-
-        if (itemID == null) {
-            Toast.makeText(this, "Item ID not found", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        loadItemDetails(itemID);
     }
 
-    private void loadItemDetails(String id) {
-        PostRepository.getItem(id, new PostRepository.PostCallback() {
-            @Override
-            public void onSuccess(Post post) {
-                runOnUiThread(() -> populateUI(post));
-            }
-
-            @Override
-            public void onFailure(String message) {
-                runOnUiThread(() -> {
-                    Toast.makeText(ItemDetailActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
-                    finish();
-                });
-            }
-        });
-    }
-
-    private void populateUI(Post post) {
+    // Populates text fields and sets up the crash-safe image slider
+    private void renderPostDetails(Post post) {
         itemName.setText(post.getItemName());
         itemDescription.setText(post.getItemDescription());
         itemLocation.setText(post.getSellerLocation());
-        itemCondition.setText(post.getCondition());
-        itemConditionDetail.setText(post.getCondition());
-        itemDatePosted.setText("Posted on " + post.getDatePosted().toString());
-
-        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
-        itemPrice.setText("R" + numberFormat.format(post.getPrice()));
-
-        if (post.getQuantity() > 0) {
-            itemStatus.setText("In Stock (" + post.getQuantity() + ")");
-        } else {
-            itemStatus.setText("Sold Out");
-        }
+        itemPrice.setText("R" + NumberFormat.getNumberInstance(Locale.US).format(post.getPrice()));
 
         if (post.getSeller() != null) {
             sellerName.setText(post.getSeller().getName() + " " + post.getSeller().getSurname());
             sellerUsername.setText("@" + post.getSeller().getUsername());
-        } else {
-            sellerName.setText("Unknown Seller");
-            sellerUsername.setText("@unknown");
         }
 
-        sellerRating.setText(String.format(Locale.getDefault(), "%.1f", post.getAverageRating()));
+        // Ensures an empty list is used if no images exist to prevent adapter crashes
+        ArrayList<String> images = post.getImageUris() != null ? post.getImageUris() : new ArrayList<>();
+        itemImageSlider.setAdapter(new ImageSliderAdapter(this, images));
+        imageCounter.setText(images.isEmpty() ? "0 / 0" : "1 / " + images.size());
 
-        ArrayList<String> imageUris = post.getImageUris();
-        if (imageUris == null) imageUris = new ArrayList<>();
+        setupChatAction(post);
+    }
 
-        ImageSliderAdapter adapter = new ImageSliderAdapter(this, imageUris);
-        itemImageSlider.setAdapter(adapter);
+    // Determines contact button visibility and handles the click event
+    private void setupChatAction(Post post) {
+        String currentUserID = SessionManager.getLoggedInUser(this) != null ? SessionManager.getLoggedInUser(this).getUserID() : "";
+        boolean isOwner = post.getSeller() != null && post.getSeller().getUserID().equals(currentUserID);
 
-        if (imageUris.size() == 0) {
-            imageCounter.setText("0 / 0");
-        } else {
-            imageCounter.setText("1 / " + imageUris.size());
-        }
-
-        ArrayList<String> finalImageUris = imageUris;
-        itemImageSlider.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                if (finalImageUris.size() == 0) {
-                    imageCounter.setText("0 / 0");
-                } else {
-                    imageCounter.setText((position + 1) + " / " + finalImageUris.size());
+        contactSellerButton.setVisibility(isOwner ? View.GONE : View.VISIBLE);
+        contactSellerButton.setOnClickListener(v -> {
+            contactSellerButton.setEnabled(false);
+            // Utilizes ChatRepository to manage the backend chat creation request
+            ChatRepository.createChat(currentUserID, post.getSeller().getUserID(), post.getItemID(), null, new ChatRepository.ActionCallback() {
+                @Override
+                public void onSuccess(String chatID) {
+                    runOnUiThread(() -> {
+                        contactSellerButton.setEnabled(true);
+                        Intent intent = new Intent(ItemDetailActivity.this, ChatActivity.class);
+                        intent.putExtra("chatID", chatID);
+                        intent.putExtra("currentUserID", currentUserID);
+                        intent.putExtra("name", post.getSeller().getName());
+                        intent.putExtra("username", post.getSeller().getUsername());
+                        startActivity(intent);
+                    });
                 }
-            }
-        });
 
-        boolean isOwnPost = false;
-        if (post.getSeller() != null && SessionManager.getLoggedInUser(this) != null) {
-            isOwnPost = post.getSeller().getUserID()
-                    .equals(SessionManager.getLoggedInUser(this).getUserID());
-        }
-
-        if (isOwnPost) {
-            contactSellerButton.setVisibility(View.GONE);
-        } else {
-            contactSellerButton.setVisibility(View.VISIBLE);
-            contactSellerButton.setOnClickListener(v -> {
-                Intent intent = new Intent(this, ChatActivity.class);
-                if (post.getSeller() != null) {
-                    intent.putExtra("name", post.getSeller().getName() + " " + post.getSeller().getSurname());
-                    intent.putExtra("username", post.getSeller().getUsername());
+                @Override
+                public void onFailure(String message) {
+                    runOnUiThread(() -> {
+                        contactSellerButton.setEnabled(true);
+                        Toast.makeText(ItemDetailActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
+                    });
                 }
-                startActivity(intent);
             });
-        }
+        });
     }
 }

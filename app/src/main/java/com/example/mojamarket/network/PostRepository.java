@@ -17,11 +17,6 @@ public class PostRepository {
         void onFailure(String message);
     }
 
-    public interface PostCallback {
-        void onSuccess(Post post);
-        void onFailure(String message);
-    }
-
     public interface ActionCallback {
         void onSuccess(String message);
         void onFailure(String message);
@@ -32,12 +27,10 @@ public class PostRepository {
             @Override
             public void onSuccess(JSONObject response) {
                 try {
-                    Log.d("PostRepository", "Raw feed response: " + response.toString());
                     if (!response.getBoolean("success")) {
-                        callback.onFailure(response.optString("message", "Failed to load feed"));
+                        callback.onFailure(response.optString("message", "Error"));
                         return;
                     }
-
                     JSONArray arr = response.getJSONArray("data");
                     List<Post> posts = new ArrayList<>();
                     for (int i = 0; i < arr.length(); i++) {
@@ -46,7 +39,7 @@ public class PostRepository {
                     }
                     callback.onSuccess(posts);
                 } catch (Exception e) {
-                    callback.onFailure("Failed to parse feed: " + e.getMessage());
+                    callback.onFailure(e.getMessage());
                 }
             }
 
@@ -57,62 +50,19 @@ public class PostRepository {
         });
     }
 
-    public static void getItem(String itemID, PostCallback callback) {
-        try {
-            JSONObject body = new JSONObject();
-            body.put("itemID", itemID);
-
-            ApiClient.getInstance().post(ApiConstants.ITEM_DETAIL, body, new ApiClient.ApiCallback() {
-                @Override
-                public void onSuccess(JSONObject response) {
-                    try {
-                        if (!response.getBoolean("success")) {
-                            callback.onFailure(response.optString("message", "Item not found"));
-                            return;
-                        }
-                        JSONArray arr = response.getJSONArray("data");
-                        if (arr.length() > 0) {
-                            callback.onSuccess(postFromRow(arr.getJSONObject(0)));
-                        } else {
-                            callback.onFailure("Item details are empty");
-                        }
-                    } catch (Exception e) {
-                        callback.onFailure("Failed to parse item: " + e.getMessage());
-                    }
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    callback.onFailure(errorMessage);
-                }
-            });
-        } catch (Exception e) {
-            callback.onFailure("Failed to build request: " + e.getMessage());
-        }
-    }
-
     public static void postItem(Post post, ActionCallback callback) {
         try {
-            JSONObject imageObj = new JSONObject();
-            imageObj.put("imageID", UUID.randomUUID().toString());
-            String firstImg = (post.getImageUris() != null && !post.getImageUris().isEmpty())
-                    ? post.getImageUris().get(0) : "";
-            imageObj.put("imagePath", firstImg);
-
-            JSONObject body = post.toJSONObject();
-            body.put("itemImage", imageObj);
-
-            ApiClient.getInstance().post(ApiConstants.POST_ITEM, body, new ApiClient.ApiCallback() {
+            ApiClient.getInstance().post(ApiConstants.POST_ITEM, post.toJSONObject(), new ApiClient.ApiCallback() {
                 @Override
                 public void onSuccess(JSONObject response) {
                     try {
                         if (!response.getBoolean("success")) {
-                            callback.onFailure(response.optString("message", "Failed to post item"));
+                            callback.onFailure(response.optString("message", "Error"));
                         } else {
-                            callback.onSuccess(response.optString("message", "Item posted successfully"));
+                            callback.onSuccess(response.optString("message", "Success"));
                         }
                     } catch (Exception e) {
-                        callback.onFailure("Failed to parse response: " + e.getMessage());
+                        callback.onFailure(e.getMessage());
                     }
                 }
 
@@ -122,43 +72,29 @@ public class PostRepository {
                 }
             });
         } catch (Exception e) {
-            callback.onFailure("Failed to build request: " + e.getMessage());
+            callback.onFailure(e.getMessage());
         }
     }
 
     static Post postFromRow(JSONObject row) {
         try {
-            String userID = row.optString("user_id", "");
-            String name = row.optString("name", "");
-            String surname = row.optString("surname", "");
-            String username = row.optString("username", "unknown");
+            String itemUUID = row.optString("item_id", "").trim();
+            if (itemUUID.isEmpty()) return null;
 
-            if (userID.isEmpty()) userID = UUID.randomUUID().toString();
-
-            User seller = new User(name, surname, username, "", "");
-            seller.setUserID(userID);
+            User seller = new User(row.optString("name", ""), row.optString("surname", ""), row.optString("username", "unknown"), "", "");
+            seller.setUserID(row.optString("user_id", UUID.randomUUID().toString()));
 
             Date date;
             try {
-                String rawDate = row.optString("date_posted", "2000-01-01 00:00:00").trim();
+                String rawDate = row.optString("date_posted", "2000-01-01 00:00:00").replace("T", " ");
                 if (rawDate.contains(".")) rawDate = rawDate.substring(0, rawDate.indexOf('.'));
-                if (rawDate.contains("+")) rawDate = rawDate.substring(0, rawDate.indexOf('+'));
-                if (rawDate.contains("T")) rawDate = rawDate.replace("T", " ");
                 date = new Date(java.sql.Timestamp.valueOf(rawDate).getTime());
             } catch (Exception e) {
                 date = new Date();
             }
 
-            UUID itemUUID;
-            try {
-                String idStr = row.optString("item_id", "");
-                itemUUID = idStr.isEmpty() ? UUID.randomUUID() : UUID.fromString(idStr);
-            } catch (Exception e) {
-                itemUUID = UUID.randomUUID();
-            }
-
             Post post = new Post(
-                    row.optString("item_name", "Untitled Item"),
+                    row.optString("item_name", "Untitled"),
                     row.optString("item_description", ""),
                     row.optString("item_condition", ""),
                     row.optDouble("item_price", 0.0),
@@ -171,14 +107,10 @@ public class PostRepository {
             );
 
             ArrayList<String> images = new ArrayList<>();
-            if (row.has("image_data") && !row.isNull("image_data")) {
-                images.add(row.getString("image_data"));
-            }
+            if (row.has("image_data") && !row.isNull("image_data")) images.add(row.getString("image_data"));
             post.setImageUris(images);
             return post;
-
         } catch (Exception e) {
-            Log.e("PostRepository", "postFromRow failed: " + e.getMessage());
             return null;
         }
     }

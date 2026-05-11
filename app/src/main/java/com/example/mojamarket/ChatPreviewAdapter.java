@@ -53,9 +53,11 @@ public class ChatPreviewAdapter extends RecyclerView.Adapter<ChatPreviewAdapter.
             holder.chatLastMessage.setTypeface(null, Typeface.NORMAL);
         }
 
+        // Pass the correct extras that ChatActivity expects
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ChatActivity.class);
-            intent.putExtra("user_id", chat.getUserId());
+            intent.putExtra("chatID", String.valueOf(chat.getUserId()));
+            intent.putExtra("currentUserID", chat.getUserId());
             intent.putExtra("name", chat.getName());
             intent.putExtra("username", chat.getUsername());
             context.startActivity(intent);

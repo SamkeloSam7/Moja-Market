@@ -79,7 +79,7 @@ public class Helper {
         try {
             User seller = userFromJSON(json.getJSONObject("seller"));
             Date datePosted = new Date(json.getLong("datePosted"));
-            UUID itemID = UUID.fromString(json.getString("itemID"));
+            String itemID = json.getString("itemID");
 
             Post post = new Post(
                     json.getString("itemName"),
@@ -133,7 +133,8 @@ public class Helper {
         try {
             User buyer = userFromJSON(json.getJSONObject("buyer"));
             Date datePosted = new Date(json.getLong("datePosted"));
-            UUID id = UUID.fromString(json.getString("id"));
+            String id = json.getString("id");
+
 
             Want want = new Want(
                     json.getString("item"),

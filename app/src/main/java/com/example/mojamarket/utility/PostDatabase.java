@@ -27,7 +27,7 @@ public class PostDatabase {
         }
     }
 
-    public static Post getPost(Context context, UUID postId) {
+    public static Post getPost(Context context, String postId) {
         try {
             JSONArray jsonArray = loadRawArray(context);
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -94,7 +94,7 @@ public class PostDatabase {
         }
     }
 
-    public static void deletePost(Context context, UUID postId) {
+    public static void deletePost(Context context, String postId) {
         try {
             JSONArray jsonArray = loadRawArray(context);
             for (int i = 0; i < jsonArray.length(); i++) {

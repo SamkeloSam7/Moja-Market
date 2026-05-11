@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public class Want {
-    private UUID id;
+    private String id;
     private String item, description;
     private User buyer;
     private boolean wantStatus;
@@ -16,7 +16,7 @@ public class Want {
     private final Date datePosted;
 
     public Want(String item, String description, double budget, User buyer) {
-        this.id = UUID.randomUUID();
+        this.id = UUID.randomUUID().toString();
         this.item = item;
         this.description = description;
         this.buyer = buyer;
@@ -25,7 +25,7 @@ public class Want {
         this.datePosted = new Date();
     }
 
-    public Want(String item, String description, double budget, User buyer, Date datePosted, UUID id) {
+    public Want(String item, String description, double budget, User buyer, Date datePosted, String id) {
         this.id = id;
         this.item = item;
         this.description = description;
@@ -35,7 +35,7 @@ public class Want {
         this.datePosted = datePosted;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 

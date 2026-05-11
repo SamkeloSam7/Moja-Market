@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mojamarket.models.Post;
+import com.example.mojamarket.session.SessionManager;
 
 import java.util.List;
 import java.util.Locale;
@@ -63,8 +64,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         holder.itemImage.setImageResource(android.R.drawable.ic_menu_gallery);
 
         holder.itemView.setOnClickListener(v -> {
+            SessionManager.setCurrentClickedItem(post);
             Intent intent = new Intent(context, ItemDetailActivity.class);
-            intent.putExtra("ITEM_ID", post.getItemID().toString());
             context.startActivity(intent);
         });
     }

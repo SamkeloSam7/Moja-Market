@@ -6,18 +6,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.button.MaterialButton;
 import com.example.mojamarket.models.Want;
+import com.example.mojamarket.network.ApiClient;
+import com.example.mojamarket.network.ApiConstants;
 import com.example.mojamarket.session.SessionManager;
+import com.google.android.material.button.MaterialButton;
+
+import org.json.JSONObject;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.WantRequestViewHolder> {
 
@@ -67,19 +73,68 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
             holder.respondButton.setVisibility(isOwn ? View.GONE : View.VISIBLE);
         }
 
-        // FIX: Set the want in SessionManager before navigating so WantDetailActivity can read it
+        // Clicking the card always just opens the detail screen
         holder.itemView.setOnClickListener(v -> {
             SessionManager.setCurrentClickedWantRequest(request);
             Intent intent = new Intent(context, WantDetailActivity.class);
             context.startActivity(intent);
         });
 
+        // Respond button creates a chat then opens ChatActivity
         holder.respondButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ChatActivity.class);
-            intent.putExtra("user_id", request.getBuyer().getUserID().toString());
-            intent.putExtra("name", request.getBuyer().getName());
-            intent.putExtra("username", request.getBuyer().getUsername());
-            context.startActivity(intent);
+            String currentUserID = SessionManager.getLoggedInUser(context).getUserID();
+            String buyerID = request.getBuyer().getUserID();
+            String chatID = UUID.randomUUID().toString();
+
+            holder.respondButton.setEnabled(false);
+
+            try {
+                JSONObject body = new JSONObject();
+                body.put("chatID", chatID);
+                body.put("user1", currentUserID);
+                body.put("user2", buyerID);
+                body.put("itemID", JSONObject.NULL);
+                body.put("wantID", request.getId().toString());
+
+                ApiClient.getInstance().post(
+                        ApiConstants.BASE_URL + "/api/chat/create", body,
+                        new ApiClient.ApiCallback() {
+                            @Override
+                            public void onSuccess(JSONObject response) {
+                                String actualChatID = response.optJSONObject("data") != null
+                                        ? response.optJSONObject("data").optString("chatID", chatID)
+                                        : chatID;
+
+                                // Post back to main thread since this callback is on a background thread
+                                android.os.Handler mainHandler = new android.os.Handler(
+                                        android.os.Looper.getMainLooper()
+                                );
+                                mainHandler.post(() -> {
+                                    holder.respondButton.setEnabled(true);
+                                    Intent intent = new Intent(context, ChatActivity.class);
+                                    intent.putExtra("chatID", actualChatID);
+                                    intent.putExtra("currentUserID", currentUserID);
+                                    intent.putExtra("name", request.getBuyer().getName());
+                                    intent.putExtra("username", request.getBuyer().getUsername());
+                                    context.startActivity(intent);
+                                });
+                            }
+
+                            @Override
+                            public void onFailure(String message) {
+                                android.os.Handler mainHandler = new android.os.Handler(
+                                        android.os.Looper.getMainLooper()
+                                );
+                                mainHandler.post(() -> {
+                                    holder.respondButton.setEnabled(true);
+                                    Toast.makeText(context, "Could not start chat: " + message, Toast.LENGTH_SHORT).show();
+                                });
+                            }
+                        });
+            } catch (Exception e) {
+                holder.respondButton.setEnabled(true);
+                e.printStackTrace();
+            }
         });
     }
 

@@ -62,7 +62,8 @@ public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyLi
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(ctx, ItemDetailActivity.class);
-            intent.putExtra("post_id", post.getItemID().toString());
+            // use the same key that ItemDetailActivity reads ("ITEM_ID" not "post_id")
+            intent.putExtra("ITEM_ID", post.getItemID().toString());
             ctx.startActivity(intent);
         });
 
