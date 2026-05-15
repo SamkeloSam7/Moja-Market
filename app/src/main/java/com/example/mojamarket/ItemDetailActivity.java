@@ -28,19 +28,16 @@ public class ItemDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_detail);
 
-        // Connects XML layout components to Java variables
         initializeViews();
 
         Post post = SessionManager.getCurrentClickedItem(this);
         if (post != null) {
-            // Displays post details immediately from the session object
             renderPostDetails(post);
         } else {
             finish();
         }
     }
 
-    // Maps UI elements and initializes the back button listener
     private void initializeViews() {
         backButton = findViewById(R.id.backButton);
         itemImageSlider = findViewById(R.id.itemImageSlider);
@@ -56,7 +53,6 @@ public class ItemDetailActivity extends AppCompatActivity {
         backButton.setOnClickListener(v -> finish());
     }
 
-    // Populates text fields and sets up the crash-safe image slider
     private void renderPostDetails(Post post) {
         itemName.setText(post.getItemName());
         itemDescription.setText(post.getItemDescription());
@@ -68,15 +64,13 @@ public class ItemDetailActivity extends AppCompatActivity {
             sellerUsername.setText("@" + post.getSeller().getUsername());
         }
 
-        // Ensures an empty list is used if no images exist to prevent adapter crashes
-        ArrayList<String> images = post.getImageUris() != null ? post.getImageUris() : new ArrayList<>();
+        ArrayList<String> images = new ArrayList<>();
         itemImageSlider.setAdapter(new ImageSliderAdapter(this, images));
-        imageCounter.setText(images.isEmpty() ? "0 / 0" : "1 / " + images.size());
+        imageCounter.setText("0 / 0");
 
         setupChatAction(post);
     }
 
-    // Determines contact button visibility and handles the click event
     private void setupChatAction(Post post) {
         String currentUserID = SessionManager.getLoggedInUser(this) != null ? SessionManager.getLoggedInUser(this).getUserID() : "";
         boolean isOwner = post.getSeller() != null && post.getSeller().getUserID().equals(currentUserID);
@@ -84,7 +78,6 @@ public class ItemDetailActivity extends AppCompatActivity {
         contactSellerButton.setVisibility(isOwner ? View.GONE : View.VISIBLE);
         contactSellerButton.setOnClickListener(v -> {
             contactSellerButton.setEnabled(false);
-            // Utilizes ChatRepository to manage the backend chat creation request
             ChatRepository.createChat(currentUserID, post.getSeller().getUserID(), post.getItemID(), null, new ChatRepository.ActionCallback() {
                 @Override
                 public void onSuccess(String chatID) {
