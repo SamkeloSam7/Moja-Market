@@ -1,133 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/app_background"
-    android:fillViewport="true">
+    android:background="@color/app_background">
 
-    <LinearLayout
+    <!-- MAIN SCROLLABLE CONTENT -->
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="24dp">
-
-        <!-- BACK BUTTON -->
-
-        <!-- LOGO -->
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:gravity="start">
-
-            <ImageButton
-                android:id="@+id/backButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="top|start"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="4dp"
-                android:src="@drawable/arrow_back_24"
-                android:tint="@color/primary_text" />
-        </LinearLayout>
-
-        <FrameLayout
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:background="@drawable/bg_logo_white_circle"
-            android:elevation="6dp">
-
-            <ImageView
-                android:layout_width="76dp"
-                android:layout_height="76dp"
-                android:layout_gravity="center"
-                android:src="@drawable/moja_logo"
-                android:scaleType="centerInside" />
-        </FrameLayout>
-
-        <!-- GREETING -->
-        <TextView
-            android:id="@+id/quickLoginGreeting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
             android:gravity="center"
-            android:text="Hello again, Sam"
-            android:textColor="@color/primary_text"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:padding="24dp">
 
-        <TextView
-            android:id="@+id/quickLoginSubtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Welcome back to Moja Market"
-            android:textColor="@color/secondary_text"
-            android:textSize="15sp" />
+            <!-- LOGO -->
+            <FrameLayout
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:background="@drawable/bg_logo_white_circle"
+                android:elevation="6dp">
 
-        <!-- PASSWORD -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="Password"
-            android:textColor="@color/primary_text"
-            android:textStyle="bold" />
+                <ImageView
+                    android:layout_width="76dp"
+                    android:layout_height="76dp"
+                    android:layout_gravity="center"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/moja_logo" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:boxBackgroundColor="@color/surface_background"
-            app:boxCornerRadiusTopStart="14dp"
-            app:boxCornerRadiusTopEnd="14dp"
-            app:boxCornerRadiusBottomStart="14dp"
-            app:boxCornerRadiusBottomEnd="14dp"
-            app:boxStrokeColor="@color/border_color"
-            app:endIconMode="password_toggle"
-            app:hintEnabled="false">
+            </FrameLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/quickPasswordInput"
+            <!-- GREETING -->
+            <TextView
+                android:id="@+id/quickLoginGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:gravity="center"
+                android:text="Hello again, Sam"
+                android:textColor="@color/primary_text"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/quickLoginSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Welcome back to Moja Market"
+                android:textColor="@color/secondary_text"
+                android:textSize="15sp" />
+
+            <!-- PASSWORD LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Password"
+                android:textColor="@color/primary_text"
+                android:textStyle="bold" />
+
+            <!-- PASSWORD INPUT -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter your password"
-                android:inputType="textPassword"
-                android:minHeight="56dp"
-                android:textColor="@color/primary_text"
-                android:textColorHint="@color/input_hint" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginTop="8dp"
+                app:boxBackgroundColor="@color/surface_background"
+                app:boxCornerRadiusBottomEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxStrokeColor="@color/border_color"
+                app:endIconMode="password_toggle"
+                app:hintEnabled="false">
 
-        <!-- BUTTON -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/signInButton"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="24dp"
-            android:text="Sign In"
-            android:textAllCaps="false"
-            android:textColor="@color/message_sent_text"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/brand_blue"
-            app:cornerRadius="14dp" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/quickPasswordInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter your password"
+                    android:inputType="textPassword"
+                    android:minHeight="56dp"
+                    android:textColor="@color/primary_text"
+                    android:textColorHint="@color/input_hint" />
 
-        <!-- SWITCH ACCOUNT -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/switchAccountButton"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="18dp"
-            android:text="Not you? Switch account"
-            android:textAllCaps="false"
-            android:textColor="@color/brand_blue"
-            app:cornerRadius="14dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-    </LinearLayout>
-</ScrollView>
+            <!-- SIGN IN BUTTON -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/signInButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                android:text="Sign In"
+                android:textAllCaps="false"
+                android:textColor="@color/message_sent_text"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/brand_blue"
+                app:cornerRadius="14dp" />
+
+            <!-- SWITCH ACCOUNT BUTTON -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/switchAccountButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginTop="18dp"
+                android:text="Not you? Switch account"
+                android:textAllCaps="false"
+                android:textColor="@color/brand_blue"
+                app:cornerRadius="14dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- BACK BUTTON -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="8dp"
+        android:src="@drawable/arrow_back_24"
+        android:tint="@color/secondary_text" />
+
+</FrameLayout>

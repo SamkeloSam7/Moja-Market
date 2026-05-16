@@ -98,7 +98,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
         onboardingItems.add(new OnboardingItem(
                 R.drawable.onboarding_chat,
-                "Chat & Negotiate",
+                "Contact Seller To Chat & Negotiate",
                 "Communicate directly with buyers and sellers and negotiate deals safely."
         ));
 

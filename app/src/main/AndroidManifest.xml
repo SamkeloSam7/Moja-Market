@@ -22,10 +22,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".ChatActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".ItemDetailActivity"
             android:exported="false" />
 
