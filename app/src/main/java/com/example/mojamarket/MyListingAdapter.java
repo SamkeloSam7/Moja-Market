@@ -1,17 +1,22 @@
 package com.example.mojamarket;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.content.Context;
 import android.content.Intent;
+import android.se.omapi.Session;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mojamarket.models.Post;
+import com.example.mojamarket.session.SessionManager;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -42,15 +47,18 @@ public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyLi
     public void onBindViewHolder(@NonNull MyListingViewHolder holder, int position) {
         Post post = postList.get(position);
         Context ctx = holder.itemView.getContext();
+        SessionManager.setCurrentClickedItem(post);
 
-        holder.profileListingName.setText(post.getItemName());
-        holder.profileListingDescription.setText(post.getItemDescription());
+        Post clickedItem = SessionManager.getCurrentClickedItem(ctx);
+
+        holder.profileListingName.setText(clickedItem.getItemName());
+        holder.profileListingDescription.setText(clickedItem.getItemDescription());
 
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
-        holder.profileListingPrice.setText("R" + numberFormat.format(post.getPrice()));
-        holder.profileListingRating.setText(String.format(Locale.getDefault(), "%.1f", post.getAverageRating()));
+        holder.profileListingPrice.setText("R" + numberFormat.format(clickedItem.getPrice()));
+        holder.profileListingRating.setText(String.format(Locale.getDefault(), "%.1f", clickedItem.getAverageRating()));
 
-        if ("available".equalsIgnoreCase(post.getStockStatus()) || post.getQuantity() > 0) {
+        if ("available".equalsIgnoreCase(clickedItem.getStockStatus()) || clickedItem.getQuantity() > 0) {
             holder.profileListingStatus.setText("Available");
             holder.profileListingStatus.setBackgroundResource(R.drawable.bg_available_badge);
             holder.profileListingStatus.setTextColor(0xFFFFFFFF);
@@ -61,15 +69,15 @@ public class MyListingAdapter extends RecyclerView.Adapter<MyListingAdapter.MyLi
         }
 
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(ctx, ItemDetailActivity.class);
-            // use the same key that ItemDetailActivity reads ("ITEM_ID" not "post_id")
-            intent.putExtra("ITEM_ID", post.getItemID().toString());
-            ctx.startActivity(intent);
+            Context context = v.getContext();
+            SessionManager.setCurrentClickedItem(post);
+            Intent intent = new Intent(context, ItemDetailActivity.class);
+            context.startActivity(intent);
         });
 
         holder.editListingBtn.setOnClickListener(v -> {
             if (editListener != null) {
-                editListener.onEditPostClick(post);
+                editListener.onEditPostClick(clickedItem);
             }
         });
     }

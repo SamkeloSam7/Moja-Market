@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
@@ -48,6 +49,12 @@ public class Helper {
         }
     }
 
+    public static String formatDate(Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy");
+        String formattedDate = formatter.format(date);
+
+        return formattedDate;
+    }
     public static JSONObject postToJSON(Post post) {
         JSONObject jsonObject = new JSONObject();
         try {

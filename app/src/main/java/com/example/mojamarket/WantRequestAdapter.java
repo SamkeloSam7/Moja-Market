@@ -15,6 +15,7 @@ import com.example.mojamarket.models.Want;
 import com.example.mojamarket.network.ApiClient;
 import com.example.mojamarket.network.ApiConstants;
 import com.example.mojamarket.session.SessionManager;
+import com.example.mojamarket.utility.Helper;
 import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONObject;
@@ -53,13 +54,10 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
         holder.requestBudget.setText("Budget: R" + numberFormat.format((int) request.getBudget()));
 
-        holder.requestDate.setText(dateFormat.format(request.getDatePosted()));
+        holder.requestDate.setText(Helper.formatDate(request.getDatePosted()));
         holder.requestUser.setText("by " + request.getBuyer().getUsername());
 
         boolean isActive = request.isWantStatus();
-        boolean isOwn = request.getBuyer().getUserID().equals(
-                SessionManager.getLoggedInUser(context).getUserID()
-        );
 
         if (!isActive) {
             holder.requestStatus.setText("Fulfilled");

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mojamarket.models.Post;
 import com.example.mojamarket.session.SessionManager;
+import com.example.mojamarket.utility.Helper;
 
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +43,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         holder.itemDescription.setText(post.getItemDescription());
         holder.itemPrice.setText(String.format(Locale.getDefault(), "R%,.0f", post.getPrice()));
         holder.itemLocation.setText(post.getSellerLocation());
-        holder.itemDate.setText("Posted " + post.getDatePosted().toString());
+        holder.itemDate.setText("Posted " + Helper.formatDate(post.getDatePosted()));
         holder.itemSeller.setText("by " + (post.getSeller() != null ? post.getSeller().getUsername() : "unknown"));
 
         if (post.getAverageRating() > 0) {

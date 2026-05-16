@@ -217,7 +217,7 @@
                     app:tint="@color/secondary_text" />
 
                 <TextView
-                    android:id="@+id/postedDate"
+                    android:id="@+id/request_postedDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"

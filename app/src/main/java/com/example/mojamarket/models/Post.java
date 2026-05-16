@@ -26,6 +26,7 @@ public class Post {
     private double averageRating;
     private Image itemImage;
 
+
     public Post(String itemName, String itemDescription, String condition, double price, int quantity, String stockStatus, String sellerLocation, Context context) {
         this.itemID = UUID.randomUUID().toString();
         this.seller = SessionManager.getLoggedInUser(context);

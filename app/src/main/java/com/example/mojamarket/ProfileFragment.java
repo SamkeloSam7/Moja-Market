@@ -39,10 +39,7 @@ public class ProfileFragment extends Fragment {
 
     private MaterialButton tabMyListings;
     private MaterialButton tabMyWants;
-    private MaterialButton editProfileButton;
-    private MaterialButton themeToggleButton;
     private MaterialButton settingsButton;
-    private MaterialButton logoutButton;
 
     private LinearLayout listingsSection;
     private LinearLayout wantsSection;
@@ -122,9 +119,7 @@ public class ProfileFragment extends Fragment {
         myListingsRecyclerView = view.findViewById(R.id.myListingsRecyclerView);
         myWantsRecyclerView = view.findViewById(R.id.myWantsRecyclerView);
 
-        themeToggleButton = view.findViewById(R.id.themeToggleButton);
         settingsButton = view.findViewById(R.id.settingsButton);
-        logoutButton = view.findViewById(R.id.logoutButton);
 
         user = SessionManager.getLoggedInUser(requireContext());
         name = user.getName();
@@ -144,38 +139,12 @@ public class ProfileFragment extends Fragment {
         loadProfileLists();
 
         showListingsTab();
-        updateThemeButtonText();
 
         tabMyListings.setOnClickListener(v -> showListingsTab());
         tabMyWants.setOnClickListener(v -> showWantsTab());
 
-        themeToggleButton.setOnClickListener(v -> {
-            String currentTheme = ThemeUtils.getCurrentTheme(requireContext());
-
-            if ("dark".equals(currentTheme)) {
-                ThemeUtils.setTheme(requireContext(), "light");
-            } else {
-                ThemeUtils.setTheme(requireContext(), "dark");
-            }
-
-            requireActivity().recreate();
-        });
-
         settingsButton.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), SettingsActivity.class);
-            startActivity(intent);
-        });
-
-        logoutButton.setOnClickListener(v -> {
-            requireActivity()
-                    .getSharedPreferences("MojaMarketPrefs", 0)
-                    .edit()
-                    .clear()
-                    .apply();
-
-            SessionManager.setLoggedInUser(null);
-            Intent intent = new Intent(requireActivity(), OnboardingActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
     }
@@ -250,15 +219,6 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    private void updateThemeButtonText() {
-        String currentTheme = ThemeUtils.getCurrentTheme(requireContext());
-
-        if ("dark".equals(currentTheme)) {
-            themeToggleButton.setText("Switch to Light Mode");
-        } else {
-            themeToggleButton.setText("Switch to Dark Mode");
-        }
-    }
 
     private void showListingsTab() {
         listingsSection.setVisibility(View.VISIBLE);

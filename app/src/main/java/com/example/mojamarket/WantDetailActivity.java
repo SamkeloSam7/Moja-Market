@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.mojamarket.models.Want;
+import com.example.mojamarket.utility.Helper;
 import com.example.mojamarket.session.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import java.text.NumberFormat;
@@ -16,7 +17,7 @@ import java.util.Locale;
 public class WantDetailActivity extends AppCompatActivity {
 
     private ImageButton backButton;
-    private TextView wantItemName, wantBudget, wantDescription, requesterName, requesterUsername;
+    private TextView wantItemName, wantBudget, wantDescription, requesterName, requesterUsername, datePosted;
     private MaterialButton respondButton;
 
     @Override
@@ -43,6 +44,7 @@ public class WantDetailActivity extends AppCompatActivity {
         wantBudget = findViewById(R.id.wantBudget);
         wantDescription = findViewById(R.id.wantDescription);
         requesterName = findViewById(R.id.requesterName);
+        datePosted = findViewById(R.id.request_postedDate);
         requesterUsername = findViewById(R.id.requesterUsername);
         backButton.setOnClickListener(v -> finish());
     }
@@ -52,6 +54,7 @@ public class WantDetailActivity extends AppCompatActivity {
         wantItemName.setText(want.getItem());
         wantDescription.setText(want.getDescription());
         wantBudget.setText("R" + NumberFormat.getNumberInstance(Locale.US).format(want.getBudget()));
+        datePosted.setText("Posted on " + Helper.formatDate(want.getDatePosted()));
 
         if (want.getBuyer() != null) {
             requesterName.setText(want.getBuyer().getName() + " " + want.getBuyer().getSurname());
