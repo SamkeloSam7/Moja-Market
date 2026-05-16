@@ -123,7 +123,6 @@ public class ProfileFragment extends Fragment {
         myListingsRecyclerView = view.findViewById(R.id.myListingsRecyclerView);
         myWantsRecyclerView = view.findViewById(R.id.myWantsRecyclerView);
 
-        editProfileButton = view.findViewById(R.id.editProfileButton);
         themeToggleButton = view.findViewById(R.id.themeToggleButton);
         settingsButton = view.findViewById(R.id.settingsButton);
         logoutButton = view.findViewById(R.id.logoutButton);
@@ -150,8 +149,6 @@ public class ProfileFragment extends Fragment {
 
         tabMyListings.setOnClickListener(v -> showListingsTab());
         tabMyWants.setOnClickListener(v -> showWantsTab());
-
-        editProfileButton.setOnClickListener(v -> showEditProfileDialog());
 
         themeToggleButton.setOnClickListener(v -> {
             String currentTheme = ThemeUtils.getCurrentTheme(requireContext());

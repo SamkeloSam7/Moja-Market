@@ -65,12 +65,10 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
             holder.requestStatus.setText("Fulfilled");
             holder.requestStatus.setBackgroundResource(R.drawable.bg_fulfilled_badge);
             holder.requestStatus.setTextColor(0xFF64748B);
-            holder.respondButton.setVisibility(View.GONE);
         } else {
             holder.requestStatus.setText("Looking");
             holder.requestStatus.setBackgroundResource(R.drawable.bg_looking_badge);
             holder.requestStatus.setTextColor(0xFFFFFFFF);
-            holder.respondButton.setVisibility(isOwn ? View.GONE : View.VISIBLE);
         }
 
         // Clicking the card always just opens the detail screen
@@ -78,63 +76,6 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
             SessionManager.setCurrentClickedWantRequest(request);
             Intent intent = new Intent(context, WantDetailActivity.class);
             context.startActivity(intent);
-        });
-
-        // Respond button creates a chat then opens ChatActivity
-        holder.respondButton.setOnClickListener(v -> {
-            String currentUserID = SessionManager.getLoggedInUser(context).getUserID();
-            String buyerID = request.getBuyer().getUserID();
-            String chatID = UUID.randomUUID().toString();
-
-            holder.respondButton.setEnabled(false);
-
-            try {
-                JSONObject body = new JSONObject();
-                body.put("chatID", chatID);
-                body.put("user1", currentUserID);
-                body.put("user2", buyerID);
-                body.put("itemID", JSONObject.NULL);
-                body.put("wantID", request.getId().toString());
-
-                ApiClient.getInstance().post(
-                        ApiConstants.BASE_URL + "/api/chat/create", body,
-                        new ApiClient.ApiCallback() {
-                            @Override
-                            public void onSuccess(JSONObject response) {
-                                String actualChatID = response.optJSONObject("data") != null
-                                        ? response.optJSONObject("data").optString("chatID", chatID)
-                                        : chatID;
-
-                                // Post back to main thread since this callback is on a background thread
-                                android.os.Handler mainHandler = new android.os.Handler(
-                                        android.os.Looper.getMainLooper()
-                                );
-                                mainHandler.post(() -> {
-                                    holder.respondButton.setEnabled(true);
-                                    Intent intent = new Intent(context, ChatActivity.class);
-                                    intent.putExtra("chatID", actualChatID);
-                                    intent.putExtra("currentUserID", currentUserID);
-                                    intent.putExtra("name", request.getBuyer().getName());
-                                    intent.putExtra("username", request.getBuyer().getUsername());
-                                    context.startActivity(intent);
-                                });
-                            }
-
-                            @Override
-                            public void onFailure(String message) {
-                                android.os.Handler mainHandler = new android.os.Handler(
-                                        android.os.Looper.getMainLooper()
-                                );
-                                mainHandler.post(() -> {
-                                    holder.respondButton.setEnabled(true);
-                                    Toast.makeText(context, "Could not start chat: " + message, Toast.LENGTH_SHORT).show();
-                                });
-                            }
-                        });
-            } catch (Exception e) {
-                holder.respondButton.setEnabled(true);
-                e.printStackTrace();
-            }
         });
     }
 
@@ -145,7 +86,6 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
 
     public static class WantRequestViewHolder extends RecyclerView.ViewHolder {
         TextView requestItemName, requestStatus, requestDescription, requestBudget, requestDate, requestUser;
-        MaterialButton respondButton;
 
         public WantRequestViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -155,7 +95,6 @@ public class WantRequestAdapter extends RecyclerView.Adapter<WantRequestAdapter.
             requestBudget = itemView.findViewById(R.id.requestBudget);
             requestDate = itemView.findViewById(R.id.requestDate);
             requestUser = itemView.findViewById(R.id.requestUser);
-            respondButton = itemView.findViewById(R.id.respondButton);
         }
     }
 }

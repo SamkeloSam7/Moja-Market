@@ -46,16 +46,6 @@
                     android:textColor="@color/secondary_text"
                     android:textSize="14sp" />
             </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/editProfileButton"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Edit"
-                android:textAllCaps="false"
-                android:textSize="13sp"
-                app:cornerRadius="12dp" />
         </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView

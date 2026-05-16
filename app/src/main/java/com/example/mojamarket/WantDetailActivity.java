@@ -9,7 +9,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.mojamarket.models.Want;
 import com.example.mojamarket.session.SessionManager;
-import com.example.mojamarket.network.ChatRepository;
 import com.google.android.material.button.MaterialButton;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -45,7 +44,6 @@ public class WantDetailActivity extends AppCompatActivity {
         wantDescription = findViewById(R.id.wantDescription);
         requesterName = findViewById(R.id.requesterName);
         requesterUsername = findViewById(R.id.requesterUsername);
-        respondButton = findViewById(R.id.respondButton);
         backButton.setOnClickListener(v -> finish());
     }
 
@@ -59,41 +57,5 @@ public class WantDetailActivity extends AppCompatActivity {
             requesterName.setText(want.getBuyer().getName() + " " + want.getBuyer().getSurname());
             requesterUsername.setText("@" + want.getBuyer().getUsername());
         }
-
-        initializeRespondButton(want);
-    }
-
-    // Manages button visibility and triggers the chat creation through ChatRepository
-    private void initializeRespondButton(Want want) {
-        String currentUserID = SessionManager.getLoggedInUser(this) != null ? SessionManager.getLoggedInUser(this).getUserID() : "";
-        boolean isSelf = want.getBuyer() != null && want.getBuyer().getUserID().equals(currentUserID);
-
-        respondButton.setVisibility(isSelf ? View.GONE : View.VISIBLE);
-        respondButton.setOnClickListener(v -> {
-            respondButton.setEnabled(false);
-            // Calls the centralized ChatRepository, passing wantID while keeping itemID null
-            ChatRepository.createChat(currentUserID, want.getBuyer().getUserID(), null, want.getId(), new ChatRepository.ActionCallback() {
-                @Override
-                public void onSuccess(String chatID) {
-                    runOnUiThread(() -> {
-                        respondButton.setEnabled(true);
-                        Intent intent = new Intent(WantDetailActivity.this, ChatActivity.class);
-                        intent.putExtra("chatID", chatID);
-                        intent.putExtra("currentUserID", currentUserID);
-                        intent.putExtra("name", want.getBuyer().getName());
-                        intent.putExtra("username", want.getBuyer().getUsername());
-                        startActivity(intent);
-                    });
-                }
-
-                @Override
-                public void onFailure(String message) {
-                    runOnUiThread(() -> {
-                        respondButton.setEnabled(true);
-                        Toast.makeText(WantDetailActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
-                    });
-                }
-            });
-        });
     }
 }

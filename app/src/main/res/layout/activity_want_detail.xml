@@ -28,8 +28,8 @@
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
-                android:src="@android:drawable/ic_media_previous"
-                android:tint="@color/secondary_text" />
+                android:src="@drawable/arrow_back_24"
+                app:tint="@color/secondary_text" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -112,7 +112,7 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@android:drawable/ic_menu_info_details"
-                        android:tint="@color/brand_green" />
+                        app:tint="@color/brand_green" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -173,7 +173,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@android:drawable/ic_menu_myplaces"
-                        android:tint="@color/secondary_text" />
+                        app:tint="@color/secondary_text" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -199,7 +199,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="@samkelo"
                     android:textColor="@color/secondary_text"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -215,7 +214,7 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@android:drawable/ic_menu_today"
-                    android:tint="@color/secondary_text" />
+                    app:tint="@color/secondary_text" />
 
                 <TextView
                     android:id="@+id/postedDate"
@@ -226,19 +225,6 @@
                     android:textColor="@color/secondary_text"
                     android:textSize="14sp" />
             </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/respondButton"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="24dp"
-                android:text="Respond to Request"
-                android:textAllCaps="false"
-                android:textColor="@color/message_sent_text"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:backgroundTint="@color/brand_purple"
-                app:cornerRadius="14dp" />
 
             <LinearLayout
                 android:id="@+id/ownRequestBox"

@@ -35,12 +35,9 @@ public class MainActivity extends AppCompatActivity {
                 selectedFragment = new WantsFragment();
             } else if (itemId == R.id.nav_post) {
                 selectedFragment = new PostFragment();
-            } else if (itemId == R.id.nav_chats) {
-                selectedFragment = new ChatsFragment();
             } else if (itemId == R.id.nav_profile) {
                 selectedFragment = new ProfileFragment();
             }
-
             if (selectedFragment != null) {
                 loadFragment(selectedFragment);
                 return true;

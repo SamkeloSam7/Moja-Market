@@ -108,20 +108,6 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/respondButton"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:layout_marginTop="14dp"
-            android:text="Respond to Request"
-            android:textAllCaps="false"
-            android:textColor="@color/message_sent_text"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/brand_purple"
-            app:cornerRadius="12dp"
-            app:rippleColor="@color/info_box_bg" />
-
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

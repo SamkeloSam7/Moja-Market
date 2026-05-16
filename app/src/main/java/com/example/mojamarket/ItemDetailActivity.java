@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.mojamarket.models.Post;
 import com.example.mojamarket.session.SessionManager;
-import com.example.mojamarket.network.ChatRepository;
 import com.google.android.material.button.MaterialButton;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     private ImageButton backButton;
     private ViewPager2 itemImageSlider;
-    private TextView imageCounter, itemName, itemPrice, itemStatus, itemDescription, itemLocation, sellerName, sellerUsername;
+    private TextView itemName, itemPrice, itemStatus, itemDescription, itemLocation, sellerName, sellerUsername;
     private MaterialButton contactSellerButton;
 
     @Override
@@ -41,7 +40,6 @@ public class ItemDetailActivity extends AppCompatActivity {
     private void initializeViews() {
         backButton = findViewById(R.id.backButton);
         itemImageSlider = findViewById(R.id.itemImageSlider);
-        imageCounter = findViewById(R.id.imageCounter);
         itemName = findViewById(R.id.itemName);
         itemPrice = findViewById(R.id.itemPrice);
         itemStatus = findViewById(R.id.itemStatus);
@@ -65,41 +63,6 @@ public class ItemDetailActivity extends AppCompatActivity {
         }
 
         ArrayList<String> images = new ArrayList<>();
-        itemImageSlider.setAdapter(new ImageSliderAdapter(this, images));
-        imageCounter.setText("0 / 0");
-
-        setupChatAction(post);
-    }
-
-    private void setupChatAction(Post post) {
-        String currentUserID = SessionManager.getLoggedInUser(this) != null ? SessionManager.getLoggedInUser(this).getUserID() : "";
-        boolean isOwner = post.getSeller() != null && post.getSeller().getUserID().equals(currentUserID);
-
-        contactSellerButton.setVisibility(isOwner ? View.GONE : View.VISIBLE);
-        contactSellerButton.setOnClickListener(v -> {
-            contactSellerButton.setEnabled(false);
-            ChatRepository.createChat(currentUserID, post.getSeller().getUserID(), post.getItemID(), null, new ChatRepository.ActionCallback() {
-                @Override
-                public void onSuccess(String chatID) {
-                    runOnUiThread(() -> {
-                        contactSellerButton.setEnabled(true);
-                        Intent intent = new Intent(ItemDetailActivity.this, ChatActivity.class);
-                        intent.putExtra("chatID", chatID);
-                        intent.putExtra("currentUserID", currentUserID);
-                        intent.putExtra("name", post.getSeller().getName());
-                        intent.putExtra("username", post.getSeller().getUsername());
-                        startActivity(intent);
-                    });
-                }
-
-                @Override
-                public void onFailure(String message) {
-                    runOnUiThread(() -> {
-                        contactSellerButton.setEnabled(true);
-                        Toast.makeText(ItemDetailActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
-                    });
-                }
-            });
-        });
+        itemImageSlider.setAdapter(new ImageSliderAdapter(this, images));;
     }
 }
