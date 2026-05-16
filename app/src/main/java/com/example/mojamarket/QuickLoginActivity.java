@@ -98,7 +98,7 @@ public class QuickLoginActivity extends AppCompatActivity {
                 public void onFailure(String message) {
                     runOnUiThread(() -> {
                         signInButton.setEnabled(true);
-                        Toast.makeText(QuickLoginActivity.this, "Incorrect password", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(QuickLoginActivity.this, "Login failed, try a different password", Toast.LENGTH_SHORT).show();
                     });
                 }
             });

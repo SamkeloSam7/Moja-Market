@@ -27,7 +27,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Back"
                 android:padding="8dp"
-                android:src="@android:drawable/ic_media_previous"
+                android:src="@drawable/arrow_back_24"
                 android:tint="@color/primary_text" />
 
             <TextView

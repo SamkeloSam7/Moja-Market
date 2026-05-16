@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mojamarket.models.User;
+import com.example.mojamarket.network.UserRepository;
 import com.example.mojamarket.session.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -87,15 +88,17 @@ public class SettingsActivity extends AppCompatActivity {
         themeStatusText.setText(isDark ? "Currently Dark Mode" : "Currently Light Mode");
     }
 
+
+
     private void showEditAccountDialog() {
         android.view.View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_account, null);
 
-        TextInputEditText editNameInput = dialogView.findViewById(R.id.editNameInput);
-        TextInputEditText editEmailInput = dialogView.findViewById(R.id.editEmailInput);
-        TextInputEditText editUsernameInput = dialogView.findViewById(R.id.editUsernameInput);
-        MaterialButton saveAccountChangesButton = dialogView.findViewById(R.id.saveAccountChangesButton);
+        TextInputEditText editEmailInput           = dialogView.findViewById(R.id.editEmailInput);
+        TextInputEditText editUsernameInput        = dialogView.findViewById(R.id.editUsernameInput);
+        TextInputEditText editPasswordInput        = dialogView.findViewById(R.id.editPasswordInput);
+        TextInputEditText editConfirmPasswordInput = dialogView.findViewById(R.id.editConfirmPasswordInput);
+        MaterialButton    saveButton               = dialogView.findViewById(R.id.saveProfileChangesButton);
 
-        editNameInput.setText(name);
         editEmailInput.setText(email);
         editUsernameInput.setText(username);
 
@@ -103,22 +106,64 @@ public class SettingsActivity extends AppCompatActivity {
                 .setView(dialogView)
                 .create();
 
-        saveAccountChangesButton.setOnClickListener(v -> {
-            String name = getText(editNameInput);
-            String email = getText(editEmailInput);
-            String username = getText(editUsernameInput);
+        saveButton.setOnClickListener(v -> {
+            String newEmail    = getText(editEmailInput);
+            String newUsername = getText(editUsernameInput);
+            String newPassword = getText(editPasswordInput);
+            String confirmPwd  = getText(editConfirmPasswordInput);
 
-            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(username)) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                return;
+            if (!TextUtils.isEmpty(newPassword) || !TextUtils.isEmpty(confirmPwd)) {
+                if (!newPassword.equals(confirmPwd)) {
+                    Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
 
-            settingsName.setText(name + " " + surname);
-            settingsEmail.setText(email);
-            settingsUsername.setText("@" + username);
+            User currentUser = SessionManager.getLoggedInUser(this);
 
-            Toast.makeText(this, "Account updated successfully", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
+            String emailToSend    = TextUtils.isEmpty(newEmail)    ? currentUser.getEmail()    : newEmail;
+            String usernameToSend = TextUtils.isEmpty(newUsername) ? currentUser.getUsername() : newUsername;
+            String passwordToSend = TextUtils.isEmpty(newPassword) ? currentUser.getPassword() : newPassword;
+
+            saveButton.setEnabled(false);
+
+            UserRepository.updateProfile(
+                    currentUser.getUserID(),
+                    name,
+                    surname,
+                    usernameToSend,
+                    emailToSend,
+                    passwordToSend,
+                    new UserRepository.ActionCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            runOnUiThread(() -> {
+                                saveButton.setEnabled(true);
+
+                                currentUser.setEmail(emailToSend);
+                                currentUser.setUsername(usernameToSend);
+                                SessionManager.setLoggedInUser(currentUser);
+
+                                email    = emailToSend;
+                                username = usernameToSend;
+
+                                settingsEmail.setText(emailToSend);
+                                settingsUsername.setText("@" + usernameToSend);
+
+                                Toast.makeText(SettingsActivity.this, "Account updated successfully", Toast.LENGTH_SHORT).show();
+                                dialog.dismiss();
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(String message) {
+                            runOnUiThread(() -> {
+                                saveButton.setEnabled(true);
+                                Toast.makeText(SettingsActivity.this, "Update failed: " + message, Toast.LENGTH_LONG).show();
+                            });
+                        }
+                    }
+            );
         });
 
         dialog.show();
