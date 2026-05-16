@@ -14,6 +14,10 @@ public class ApiConstants {
     public static final String ITEM_DETAIL = BASE_URL + "/api/posts/item";
     public static final String POST_ITEM   = BASE_URL + "/api/posts/items";
 
+    public static final String UPDATE_ITEM = BASE_URL + "api/posts/items/update";
+
+    public static final String DELETE_ITEM = BASE_URL + "api/posts/items/delete";
+
     // Wants
     public static final String WANTS_FEED  = BASE_URL + "/api/posts/wants/feed";
     public static final String WANT_DETAIL = BASE_URL + "/api/posts/want";

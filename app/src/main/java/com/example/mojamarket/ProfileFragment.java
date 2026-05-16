@@ -25,9 +25,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.mojamarket.models.Post;
 import com.example.mojamarket.models.User;
 import com.example.mojamarket.models.Want;
+import com.example.mojamarket.network.PostRepository;
+import com.example.mojamarket.network.UserRepository;
 import com.example.mojamarket.session.SessionManager;
 import com.example.mojamarket.utility.PostDatabase;
-import com.example.mojamarket.utility.WantDatabase;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -51,6 +52,9 @@ public class ProfileFragment extends Fragment {
     private RecyclerView myListingsRecyclerView;
     private RecyclerView myWantsRecyclerView;
 
+    private MyListingAdapter myListingAdapter;
+    private MyWantAdapter myWantAdapter;
+
     private TextView profileSubtitle;
     private TextView profileInitials;
     private TextView profileName;
@@ -67,9 +71,8 @@ public class ProfileFragment extends Fragment {
 
     private User user;
 
-    private String name, surname, username,email,password, initials;
+    private String name, surname, username, email, password, initials;
     private ArrayList<String> editableImages = new ArrayList<>();
-    private TextView imageCountTextInDialog;
 
     private final ActivityResultLauncher<String> editPostImagesLauncher =
             registerForActivityResult(new ActivityResultContracts.GetMultipleContents(), uris -> {
@@ -78,10 +81,6 @@ public class ProfileFragment extends Fragment {
                         if (editableImages.size() < 10) {
                             editableImages.add(uri.toString());
                         }
-                    }
-
-                    if (imageCountTextInDialog != null) {
-                        imageCountTextInDialog.setText("Images: " + editableImages.size() + " / 10");
                     }
 
                     if (editableImages.size() == 10) {
@@ -174,6 +173,7 @@ public class ProfileFragment extends Fragment {
                     .clear()
                     .apply();
 
+            SessionManager.setLoggedInUser(null);
             Intent intent = new Intent(requireActivity(), OnboardingActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -181,25 +181,73 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadProfileLists() {
-        myListings = new ArrayList<>(PostDatabase.getPosts(requireContext()));
-        myWants = new ArrayList<>(WantDatabase.getWants(requireContext()));
+        myListings = new ArrayList<>();
+        myWants = new ArrayList<>();
 
-        profileListedCount.setText(String.valueOf(myListings.size()));
-        profileWantedCount.setText(String.valueOf(myWants.size()));
-
+        myListingAdapter = new MyListingAdapter(myListings, this::showEditPostDialog);
         myListingsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         myListingsRecyclerView.setNestedScrollingEnabled(false);
-        myListingsRecyclerView.setAdapter(new MyListingAdapter(myListings, this::showEditPostDialog));
+        myListingsRecyclerView.setAdapter(myListingAdapter);
 
+        myWantAdapter = new MyWantAdapter(requireContext(), myWants);
         myWantsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         myWantsRecyclerView.setNestedScrollingEnabled(false);
-        myWantsRecyclerView.setAdapter(new MyWantAdapter(requireContext(), myWants));
+        myWantsRecyclerView.setAdapter(myWantAdapter);
 
-        listingsEmptyState.setVisibility(myListings.isEmpty() ? View.VISIBLE : View.GONE);
-        myListingsRecyclerView.setVisibility(myListings.isEmpty() ? View.GONE : View.VISIBLE);
+        loadUserPosts();
+        loadUserWants();
+    }
 
-        wantsEmptyState.setVisibility(myWants.isEmpty() ? View.VISIBLE : View.GONE);
-        myWantsRecyclerView.setVisibility(myWants.isEmpty() ? View.GONE : View.VISIBLE);
+    private void loadUserPosts() {
+        UserRepository.getListings(user.getUserID(), new UserRepository.PostsCallback() {
+            @Override
+            public void onSuccess(List<Post> result) {
+                if (!isAdded() || result == null) return;
+                requireActivity().runOnUiThread(() -> {
+                    myListings.clear();
+                    myListings.addAll(result);
+                    myListingAdapter.notifyDataSetChanged();
+
+                    profileListedCount.setText(String.valueOf(myListings.size()));
+                    listingsEmptyState.setVisibility(myListings.isEmpty() ? View.VISIBLE : View.GONE);
+                    myListingsRecyclerView.setVisibility(myListings.isEmpty() ? View.GONE : View.VISIBLE);
+                });
+            }
+
+            @Override
+            public void onFailure(String message) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(requireContext(), "Failed to load posts: " + message, Toast.LENGTH_SHORT).show()
+                );
+            }
+        });
+    }
+
+    private void loadUserWants() {
+        UserRepository.getWantRequests(user.getUserID(), new UserRepository.WantsCallback() {
+            @Override
+            public void onSuccess(List<Want> result) {
+                if (!isAdded() || result == null) return;
+                requireActivity().runOnUiThread(() -> {
+                    myWants.clear();
+                    myWants.addAll(result);
+                    myWantAdapter.notifyDataSetChanged();
+
+                    profileWantedCount.setText(String.valueOf(myWants.size()));
+                    wantsEmptyState.setVisibility(myWants.isEmpty() ? View.VISIBLE : View.GONE);
+                    myWantsRecyclerView.setVisibility(myWants.isEmpty() ? View.GONE : View.VISIBLE);
+                });
+            }
+
+            @Override
+            public void onFailure(String message) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(requireContext(), "Failed to load wants: " + message, Toast.LENGTH_SHORT).show()
+                );
+            }
+        });
     }
 
     private void updateThemeButtonText() {
@@ -238,48 +286,6 @@ public class ProfileFragment extends Fragment {
         tabMyListings.setTextColor(ContextCompat.getColor(requireContext(), R.color.tab_inactive_text));
     }
 
-    private void showEditProfileDialog() {
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_profile, null);
-
-        TextInputEditText editNameInput = dialogView.findViewById(R.id.editNameInput);
-        TextInputEditText editSurnameInput = dialogView.findViewById(R.id.editSurnameInput);
-        TextInputEditText editEmailInput = dialogView.findViewById(R.id.editEmailInput);
-        TextInputEditText editUsernameInput = dialogView.findViewById(R.id.editUsernameInput);
-        MaterialButton saveProfileChangesButton = dialogView.findViewById(R.id.saveProfileChangesButton);
-
-        editNameInput.setText(name);
-        editSurnameInput.setText(surname);
-        editEmailInput.setText(email);
-        editUsernameInput.setText(username);
-
-        AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setView(dialogView)
-                .create();
-
-        saveProfileChangesButton.setOnClickListener(v -> {
-            String name = getText(editNameInput);
-            String surname = getText(editSurnameInput);
-            String email = getText(editEmailInput);
-            String username = getText(editUsernameInput);
-
-            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(surname) ||
-                    TextUtils.isEmpty(email) || TextUtils.isEmpty(username)) {
-                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            profileSubtitle.setText("@" + username);
-            profileInitials.setText((name.substring(0, 1) + surname.substring(0, 1)).toUpperCase());
-            profileName.setText(name + " " + surname);
-            profileEmail.setText(email);
-
-            Toast.makeText(requireContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
-        });
-
-        dialog.show();
-    }
-
     private void showEditPostDialog(Post post) {
         postBeingEdited = post;
         editableImages.clear();
@@ -295,12 +301,10 @@ public class ProfileFragment extends Fragment {
         TextInputEditText editQuantity = dialogView.findViewById(R.id.editQuantity);
         TextInputEditText editLocation = dialogView.findViewById(R.id.editLocation);
         TextInputEditText editCondition = dialogView.findViewById(R.id.editCondition);
-        TextInputEditText editStockStatus = dialogView.findViewById(R.id.editStockStatus);
         MaterialButton saveBtn = dialogView.findViewById(R.id.saveBtn);
         MaterialButton addImagesBtn = dialogView.findViewById(R.id.addImagesBtn);
         MaterialButton removeImageBtn = dialogView.findViewById(R.id.removeImageBtn);
         MaterialButton deletePostBtn = dialogView.findViewById(R.id.deletePostBtn);
-        imageCountTextInDialog = dialogView.findViewById(R.id.imageCountText);
 
         editName.setText(post.getItemName());
         editDescription.setText(post.getItemDescription());
@@ -308,8 +312,6 @@ public class ProfileFragment extends Fragment {
         editQuantity.setText(String.valueOf(post.getQuantity()));
         editLocation.setText(post.getSellerLocation());
         editCondition.setText(post.getCondition());
-        editStockStatus.setText(post.getStockStatus());
-        imageCountTextInDialog.setText("Images: " + editableImages.size() + " / 10");
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setView(dialogView)
@@ -320,7 +322,6 @@ public class ProfileFragment extends Fragment {
         removeImageBtn.setOnClickListener(v -> {
             if (!editableImages.isEmpty()) {
                 editableImages.remove(editableImages.size() - 1);
-                imageCountTextInDialog.setText("Images: " + editableImages.size() + " / 10");
             } else {
                 Toast.makeText(requireContext(), "No images to remove", Toast.LENGTH_SHORT).show();
             }
@@ -333,18 +334,11 @@ public class ProfileFragment extends Fragment {
             String quantityText = getText(editQuantity);
             String location = getText(editLocation);
             String condition = getText(editCondition);
-            String stockStatus = getText(editStockStatus);
 
             if (TextUtils.isEmpty(name) || TextUtils.isEmpty(description) ||
                     TextUtils.isEmpty(priceText) || TextUtils.isEmpty(quantityText) ||
-                    TextUtils.isEmpty(location) || TextUtils.isEmpty(condition) ||
-                    TextUtils.isEmpty(stockStatus)) {
+                    TextUtils.isEmpty(location) || TextUtils.isEmpty(condition)) {
                 Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (editableImages.size() < 1) {
-                Toast.makeText(requireContext(), "A post must have at least 1 image", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -355,13 +349,27 @@ public class ProfileFragment extends Fragment {
                 post.setQuantity(Integer.parseInt(quantityText));
                 post.setSellerLocation(location);
                 post.setCondition(condition);
-                post.setStockStatus(stockStatus);
                 post.setImageUris(new ArrayList<>(editableImages));
 
-                PostDatabase.updatePost(requireContext(), post);
-                loadProfileLists();
-                Toast.makeText(requireContext(), "Item updated successfully", Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
+                PostRepository.updateItem(post, new PostRepository.ActionCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(() -> {
+                            loadProfileLists();
+                            Toast.makeText(requireContext(), "Item updated successfully", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String message) {
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(() ->
+                                Toast.makeText(requireContext(), "Update failed: " + message, Toast.LENGTH_SHORT).show()
+                        );
+                    }
+                });
 
             } catch (NumberFormatException e) {
                 Toast.makeText(requireContext(), "Enter valid price and quantity", Toast.LENGTH_SHORT).show();
@@ -369,10 +377,25 @@ public class ProfileFragment extends Fragment {
         });
 
         deletePostBtn.setOnClickListener(v -> {
-            PostDatabase.deletePost(requireContext(), post.getItemID());
-            loadProfileLists();
-            Toast.makeText(requireContext(), "Post deleted", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
+            PostRepository.deleteItem(post.getItemID(), new PostRepository.ActionCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    if (!isAdded()) return;
+                    requireActivity().runOnUiThread(() -> {
+                        loadProfileLists();
+                        Toast.makeText(requireContext(), "Post deleted", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    });
+                }
+
+                @Override
+                public void onFailure(String message) {
+                    if (!isAdded()) return;
+                    requireActivity().runOnUiThread(() ->
+                            Toast.makeText(requireContext(), "Delete failed: " + message, Toast.LENGTH_SHORT).show()
+                    );
+                }
+            });
         });
 
         dialog.show();

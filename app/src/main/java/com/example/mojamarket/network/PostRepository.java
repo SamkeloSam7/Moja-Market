@@ -3,6 +3,8 @@ package com.example.mojamarket.network;
 import android.util.Log;
 import com.example.mojamarket.models.Post;
 import com.example.mojamarket.models.User;
+import com.example.mojamarket.network.ApiConstants;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -58,6 +60,61 @@ public class PostRepository {
                     try {
                         if (!response.getBoolean("success")) {
                             callback.onFailure(response.optString("message", "Error"));
+                        } else {
+                            callback.onSuccess(response.optString("message", "Success"));
+                        }
+                    } catch (Exception e) {
+                        callback.onFailure(e.getMessage());
+                    }
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    callback.onFailure(errorMessage);
+                }
+            });
+        } catch (Exception e) {
+            callback.onFailure(e.getMessage());
+        }
+    }
+
+    public static void updateItem(Post post, ActionCallback callback) {
+        try {
+            ApiClient.getInstance().post(ApiConstants.UPDATE_ITEM, post.toJSONObject(), new ApiClient.ApiCallback() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    try {
+                        if (!response.getBoolean("success")) {
+                            callback.onFailure(response.optString("message", "Error updating item"));
+                        } else {
+                            callback.onSuccess(response.optString("message", "Success"));
+                        }
+                    } catch (Exception e) {
+                        callback.onFailure(e.getMessage());
+                    }
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    callback.onFailure(errorMessage);
+                }
+            });
+        } catch (Exception e) {
+            callback.onFailure(e.getMessage());
+        }
+    }
+
+    public static void deleteItem(String itemID, ActionCallback callback) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("itemID", itemID);
+
+            ApiClient.getInstance().post(ApiConstants.DELETE_ITEM, body, new ApiClient.ApiCallback() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    try {
+                        if (!response.getBoolean("success")) {
+                            callback.onFailure(response.optString("message", "Error deleting item"));
                         } else {
                             callback.onSuccess(response.optString("message", "Success"));
                         }
